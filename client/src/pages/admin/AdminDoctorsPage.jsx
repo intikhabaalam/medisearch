@@ -1,32 +1,11 @@
-import useNavigateById from '../../hooks/useNavigateById';
-import React, { useEffect, useState } from "react";
-import {
-  Users,
-  Package,
-  Stethoscope,
-  FlaskConical,
-  ShoppingBag,
-  Calendar,
-  DollarSign,
-  TrendingUp,
-  Search,
-  Plus,
-  Filter,
-  Edit,
-  Trash2,
-  CheckCircle2,
-  XCircle,
-  ShieldCheck,
-  MoreVertical,
-  ChevronDown,
-} from "lucide-react";
+
+import React, { useEffect, useMemo, useState } from "react";
+import { Search, Filter } from "lucide-react";
 import Card from "../../components/common/Card";
 import Badge from "../../components/common/Badge";
 import Button from "../../components/common/Button";
-import Sidebar from "../../components/common/Sidebar";
-import AddProductModal from "./AddProductModal";
 import VerificationModal from "./VerificationModal";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import adminService from "../../services/adminService";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
@@ -35,138 +14,245 @@ import AdminSidebar from "../../components/admin/AdminSidebar";
 import { useLocation } from "react-router-dom";
 
 export default function AdminDoctorsPage() {
-  const onNavigate = useNavigateById();
-  const { user } = useSelector((state) => state.auth);
+    const { user } = useSelector((state) => state.auth);
+    const { pathname } = useLocation();
+    const queryClient = useQueryClient();
 
-  let { pathname } = useLocation();
-  let currentPath = pathname.split("/")[pathname.split("/").length - 1];
+    const currentPath = pathname.split("/").pop();
 
-  const [activeSection, setActiveSection] = useState("Doctors");
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
-  const [verificationTarget, setVerificationTarget] = useState(null);
+    const [verificationTarget, setVerificationTarget] = useState(null);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
 
-  const { data, isLoading, isSuccess, isError, error } = useQuery({
-    queryKey: ["admin-data"],
-    queryFn: (payload) => adminService.fetchAllAdminData(user.token),
-  });
+    // Fetch doctors and other admin data
+    const {
+        data,
+        isLoading,
+        isError,
+        error
+    } = useQuery({
+        queryKey: ["admin-data"],
+        queryFn: () => adminService.fetchAllAdminData(user.token),
+        enabled: !!user?.token
+    });
 
-  console.log(data?.doctors);
+    // Approve / Reject doctor
+    const doctorMutation = useMutation({
+        mutationFn: ({ doctorId, isVerified }) =>
+            adminService.updateDoctor(
+                doctorId,
+                isVerified,
+                user.token
+            ),
 
-  useEffect(() => {
-    if (isError && error) {
-      toast.error(error.response?.data?.message || error.message);
+        onSuccess: (response, variables) => {
+            toast.success(
+                response.message ||
+                (variables.isVerified
+                    ? "Doctor verified successfully"
+                    : "Doctor verification rejected")
+            );
+
+            setVerificationTarget(null);
+
+            queryClient.invalidateQueries({
+                queryKey: ["admin-data"]
+            });
+            queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] });
+            queryClient.invalidateQueries({ queryKey: ["verified-doctors"] });
+            queryClient.invalidateQueries({ queryKey: ["public-data"] });
+        },
+
+        onError: (error) => {
+            toast.error(
+                error.response?.data?.message ||
+                error.message ||
+                "Doctor update failed"
+            );
+        }
+    });
+
+    useEffect(() => {
+        if (isError && error) {
+            toast.error(
+                error.response?.data?.message || error.message
+            );
+        }
+    }, [isError, error]);
+
+    // Search doctors
+    const filteredDoctors = useMemo(() => {
+        const doctors = data?.doctors || [];
+
+        return doctors.filter((doctor) => {
+            const search = searchTerm.toLowerCase();
+
+            const specialization = Array.isArray(doctor.specialization)
+                ? doctor.specialization.join(" ")
+                : doctor.specialization || "";
+
+            const status = doctor.isVerified ? "approved" : doctor.verificationStatus || "pending";
+            return (!statusFilter || status === statusFilter) && (
+                (doctor.clinicName || "").toLowerCase().includes(search) ||
+                specialization.toLowerCase().includes(search) ||
+                (doctor.address || "").toLowerCase().includes(search) ||
+                (doctor.qualification || "").toLowerCase().includes(search) ||
+                (doctor.registrationNumber || "").toLowerCase().includes(search) ||
+                (doctor.email || "").toLowerCase().includes(search) ||
+                (doctor.phone || "").toLowerCase().includes(search)
+            );
+        });
+    }, [data?.doctors, searchTerm, statusFilter]);
+
+    if (isLoading) {
+        return <LoaderScreen />;
     }
-  }, [isError, error, data, isSuccess]);
 
-  if (isLoading) {
-    return <LoaderScreen />;
-  }
+    return (
+        <div className="min-h-screen bg-slate-50 flex">
+            <AdminSidebar />
 
-  return (
-    <div className="min-h-screen bg-slate-50 flex">
-      <AdminSidebar />
+            <main className="flex-1 p-6 sm:p-10 space-y-8 overflow-x-hidden">
 
-      {/* Main Admin Area */}
-      <main className="flex-1 p-6 sm:p-10 space-y-8 overflow-x-hidden">
-        {/* Top Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-extrabold text-slate-900 capitalize">
-              {currentPath.toUpperCase()} OVERVIEW
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Live hospital operations, verification workflows, and
-              pharmaceutical stock control.
-            </p>
-          </div>
+                {/* Header */}
+                <div>
+                    <h1 className="text-2xl font-extrabold text-slate-900 capitalize">
+                        {currentPath} Overview
+                    </h1>
+
+                    <p className="text-xs text-slate-500 mt-1">
+                        Manage doctor registrations and verification.
+                    </p>
+                </div>
+
+                {/* Doctors Table */}
+                <Card className="p-6 border-slate-200 shadow-xs space-y-4">
+
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pb-3 border-b border-slate-100">
+
+                        <div className="relative w-full sm:w-80">
+                            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Search doctors..."
+                                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-teal-500"
+                            />
+                        </div>
+
+                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <Filter className="w-4 h-4" />
+                            Total Doctors: {filteredDoctors.length}
+                        </div>
+                        <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)} className="border border-slate-200 rounded-xl px-3 py-2 text-xs"><option value="">All applications</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs text-slate-600">
+
+                            <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-400 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th className="py-3 px-4">Clinic Name</th>
+                                    <th className="py-3 px-4">Specialty</th>
+                                    <th className="py-3 px-4">Address</th>
+                                    <th className="py-3 px-4">Registration Number</th>
+                                    <th className="py-3 px-4">Verification</th>
+                                    <th className="py-3 px-4 text-right">Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody className="divide-y divide-slate-100">
+
+                                {filteredDoctors.map((row) => (
+                                    <tr
+                                        key={row._id}
+                                        className="hover:bg-slate-50 transition-colors"
+                                    >
+                                        <td className="py-3 px-4 font-semibold text-slate-900">
+                                            {row.clinicName || "N/A"}
+                                        </td>
+
+                                        <td className="py-3 px-4 text-teal-700 font-medium">
+                                            {Array.isArray(row.specialization)
+                                                ? row.specialization.join(", ")
+                                                : row.specialization || "N/A"}
+                                        </td>
+
+                                        <td className="py-3 px-4">
+                                            {row.address || "N/A"}
+                                        </td>
+
+                                        <td className="py-3 px-4 font-mono">
+                                            {row.registrationNumber || "N/A"}
+                                        </td>
+
+                                        <td className="py-3 px-4">
+                                            <Badge
+                                                variant={row.isVerified ? "success" : row.verificationStatus === "rejected" ? "danger" : "warning"}
+                                                size="sm"
+                                                dot
+                                            >
+                                                {row.isVerified
+                                                    ? "VERIFIED"
+                                                    : row.verificationStatus === "rejected" ? "REJECTED" : "PENDING"}
+                                            </Badge>
+                                        </td>
+
+                                        <td className="py-3 px-4 text-right">
+                                            <Button
+                                                variant={row.isVerified ? "outline" : "primary"}
+                                                size="sm"
+                                                onClick={() =>
+                                                    setVerificationTarget(row)
+                                                }
+                                            >
+                                                {row.isVerified
+                                                    ? "View Details"
+                                                    : "Review & Verify"}
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+
+                                {filteredDoctors.length === 0 && (
+                                    <tr>
+                                        <td
+                                            colSpan="6"
+                                            className="text-center py-10 text-slate-400"
+                                        >
+                                            No doctors found.
+                                        </td>
+                                    </tr>
+                                )}
+
+                            </tbody>
+                        </table>
+                    </div>
+                </Card>
+            </main>
+
+            {/* Verification Modal */}
+            <VerificationModal
+                isOpen={!!verificationTarget}
+                onClose={() => setVerificationTarget(null)}
+                item={verificationTarget}
+                type="Doctor"
+                onApprove={() =>
+                    doctorMutation.mutate({
+                        doctorId: verificationTarget._id,
+                        isVerified: true
+                    })
+                }
+                onReject={() =>
+                    doctorMutation.mutate({
+                        doctorId: verificationTarget._id,
+                        isVerified: false
+                    })
+                }
+                isSaving={doctorMutation.isPending}
+            />
         </div>
-
-        {/* Table Container Card */}
-        <Card className="p-6 border-slate-200 shadow-xs space-y-4">
-          {/* Table Search & Filter Toolbar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pb-3 border-b border-slate-100">
-            <div className="relative w-full sm:w-80">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder={`Search ${activeSection}...`}
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-teal-500"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">
-                <Filter className="w-3.5 h-3.5 text-slate-400" />
-                <span>Filters</span>
-              </button>
-            </div>
-          </div>
-
-          {/* DYNAMIC DATA TABLE BY SECTION */}
-          <div className="overflow-x-auto">
-            {/* 2. DOCTORS TABLE */}
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-400 font-bold border-b border-slate-200">
-                <tr>
-                  <th className="py-3 px-4">Clinic Name</th>
-                  <th className="py-3 px-4">Specialty</th>
-                  <th className="py-3 px-4">Address</th>
-                  <th className="py-3 px-4">State License</th>
-                  <th className="py-3 px-4">Verification</th>
-                  <th className="py-3 px-4 text-right">Licensure Review</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {data?.doctors?.map((row) => (
-                  <tr
-                    key={row._id}
-                    className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3 px-4 font-semibold text-slate-900">
-                      {row.clinicName}
-                    </td>
-                    <td className="py-3 px-4 text-teal-700 font-medium">
-                      {row.specialization}
-                    </td>
-                    <td className="py-3 px-4">{row.address}</td>
-                    <td className="py-3 px-4 font-mono text-[11px]">
-                      {row.qualification}
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge variant={row.badgeVariant} size="sm" dot>
-                        {row.isVerified ? "VERIFIED" : "NOT-VERIFIED"}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <Button
-                        variant={
-                          row.status === "Verified" ? "outline" : "primary"
-                        }
-                        size="sm"
-                        onClick={() =>
-                          setVerificationTarget({ ...row, type: "Doctor" })
-                        }>
-                        {row.status === "Verified"
-                          ? "View Credentials"
-                          : "Audit & Approve"}
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      </main>
-
-      {/* MODAL: DOCTOR / PATHOLOGIST VERIFICATION */}
-      <VerificationModal
-        isOpen={!!verificationTarget}
-        onClose={() => setVerificationTarget(null)}
-        item={verificationTarget}
-        type={verificationTarget?.type}
-        onApprove={() => setVerificationTarget(null)}
-        onReject={() => setVerificationTarget(null)}
-      />
-    </div>
-  );
+    );
 }

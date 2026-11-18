@@ -18,7 +18,7 @@ const pathologyAppointmentSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enums: ["pending", "delivered", "cancelled"],
+        enum: ["pending", "delivered", "cancelled"],
         default: "pending"
     }
 }, {

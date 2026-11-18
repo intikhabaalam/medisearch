@@ -40,6 +40,7 @@ import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminDoctorsPage from './pages/admin/AdminDoctorsPage';
 import AdminPathologistsPage from './pages/admin/AdminPathologistsPage';
 import AdminAllUsersPage from './pages/admin/AdminAllUsersPage';
+import AdminTestsPage from './pages/admin/AdminTestsPage';
 import AdminRoute from './components/AdminRoute';
 
 // Create a client
@@ -86,6 +87,7 @@ export default function App() {
               <Route path="admin" element={<AdminDashboardPage />} />
               <Route path="admin/orders" element={<AdminOrdersPage />} />
               <Route path="admin/products" element={<AdminProductsPage />} />
+              <Route path="admin/tests" element={<AdminTestsPage />} />
               <Route path="admin/doctors" element={<AdminDoctorsPage />} />
               <Route path="admin/pathologists" element={<AdminPathologistsPage />} />
               <Route path="admin/users" element={<AdminAllUsersPage />} />

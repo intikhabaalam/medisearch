@@ -1,0 +1,29 @@
+import React, { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
+import { Search, Plus, Pencil, Trash2 } from "lucide-react";
+import AdminSidebar from "../../components/admin/AdminSidebar";
+import Card from "../../components/common/Card";
+import Button from "../../components/common/Button";
+import adminService from "../../services/adminService";
+import PathologyTestModal from "./PathologyTestModal";
+import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal";
+
+export default function AdminTestsPage() {
+  const { user } = useSelector(s=>s.auth); const qc=useQueryClient();
+  const [search,setSearch]=useState(""); const [category,setCategory]=useState(""); const [availability,setAvailability]=useState(""); const [maxPrice,setMaxPrice]=useState("");
+  const [editing,setEditing]=useState(null); const [formOpen,setFormOpen]=useState(false); const [deleting,setDeleting]=useState(null);
+  const {data:tests=[],isLoading,isError}=useQuery({queryKey:["admin-tests"],queryFn:()=>adminService.getTests(user.token),enabled:!!user?.token});
+  const {data:adminData}=useQuery({queryKey:["admin-data"],queryFn:()=>adminService.fetchAllAdminData(user.token),enabled:!!user?.token});
+  const save=useMutation({mutationFn:({item,id})=>adminService.saveTest(item,user.token,id),onSuccess:()=>{qc.invalidateQueries({queryKey:["admin-tests"]});qc.invalidateQueries({queryKey:["admin-data"]});qc.invalidateQueries({queryKey:["admin-dashboard"]});qc.invalidateQueries({queryKey:["public-data"]});toast.success("Lab test saved");setFormOpen(false);setEditing(null);},onError:e=>toast.error(e.response?.data?.message||e.message)});
+  const del=useMutation({mutationFn:id=>adminService.deleteTest(id,user.token),onSuccess:()=>{qc.invalidateQueries({queryKey:["admin-tests"]});qc.invalidateQueries({queryKey:["admin-dashboard"]});qc.invalidateQueries({queryKey:["public-data"]});toast.success("Lab test deleted");setDeleting(null);},onError:e=>toast.error(e.response?.data?.message||e.message)});
+  const categories=[...new Set(tests.map(t=>t.category||"General"))];
+  const filtered=useMemo(()=>tests.filter(t=>(!category||(t.category||"General")===category)&&(!availability||(availability==="available"?t.isAvailable!==false:t.isAvailable===false))&&(!maxPrice||Number(t.price)<=Number(maxPrice))&&`${t.title} ${t.category} ${t.description} ${t.pathologist?.laboratoryName||""}`.toLowerCase().includes(search.toLowerCase())),[tests,category,availability,maxPrice,search]);
+  const openEdit=test=>{setEditing(test);setFormOpen(true);};
+  return <div className="min-h-screen bg-slate-50 flex"><AdminSidebar/><main className="flex-1 p-6 sm:p-10 space-y-6"><header className="flex justify-between items-center"><div><h1 className="text-2xl font-extrabold">Lab Tests</h1><p className="text-xs text-slate-500">Manage test details, laboratory, price and public availability.</p></div><Button icon={Plus} onClick={()=>openEdit(null)}>Add Test</Button></header><Card className="p-5 space-y-4"><div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3"><div className="relative"><Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400"/><input className="border rounded-xl pl-9 pr-3 py-2 text-sm w-full" placeholder="Search tests or labs" value={search} onChange={e=>setSearch(e.target.value)}/></div><select className="border rounded-xl px-3 py-2 text-sm" value={category} onChange={e=>setCategory(e.target.value)}><option value="">All categories</option>{categories.map(c=><option key={c}>{c}</option>)}</select><select className="border rounded-xl px-3 py-2 text-sm" value={availability} onChange={e=>setAvailability(e.target.value)}><option value="">All availability</option><option value="available">Available</option><option value="unavailable">Unavailable</option></select><input className="border rounded-xl px-3 py-2 text-sm" type="number" min="0" placeholder="Maximum price" value={maxPrice} onChange={e=>setMaxPrice(e.target.value)}/></div>
+    {isLoading?<p>Loading tests…</p>:isError?<p className="text-rose-600">Could not load lab tests.</p>:<div className="overflow-x-auto"><table className="w-full text-sm text-left"><thead><tr className="text-slate-500 border-b"><th className="p-3">Test</th><th className="p-3">Category</th><th className="p-3">Lab</th><th className="p-3">Price</th><th className="p-3">Availability</th><th/></tr></thead><tbody>{filtered.map(t=><tr key={t._id} className="border-b"><td className="p-3"><b>{t.title}</b><p className="text-xs text-slate-500">{t.description}</p>{t.preparationInstructions&&<p className="text-xs text-slate-500">Prep: {t.preparationInstructions}</p>}</td><td className="p-3">{t.category||"General"}</td><td className="p-3">{t.pathologist?.laboratoryName||"—"}</td><td className="p-3">₹{Number(t.price).toFixed(2)}</td><td className="p-3">{t.isAvailable===false?"Unavailable":"Available"}</td><td className="p-3 whitespace-nowrap"><button title="Edit" onClick={()=>openEdit(t)} className="p-2"><Pencil size={16}/></button><button title="Delete" onClick={()=>setDeleting(t)} className="p-2 text-rose-600"><Trash2 size={16}/></button></td></tr>)}</tbody></table>{!filtered.length&&<p className="p-6 text-center text-slate-500">No lab tests found.</p>}</div>}</Card>
+    <PathologyTestModal isOpen={formOpen} test={editing} labs={adminData?.pathologists||[]} saving={save.isPending} onClose={()=>{setFormOpen(false);setEditing(null)}} onSubmit={item=>save.mutate({item,id:editing?._id})}/>
+    <ConfirmDeleteModal isOpen={!!deleting} entityName={deleting?.title} entityType="lab test" isDeleting={del.isPending} onCancel={()=>setDeleting(null)} onConfirm={()=>del.mutate(deleting._id)}/>
+  </main></div>;
+}

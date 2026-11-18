@@ -1,5 +1,5 @@
 const errorHandler = (err, req, res, next) => {
-    let statusCode = res.statusCode > 200 ? res.statusCode : 500;
+    let statusCode = err.statusCode || err.status || (res.statusCode > 200 ? res.statusCode : 500);
 
     // Map common client errors to proper status codes
     if (err.name === 'MulterError') {

@@ -1,182 +1,32 @@
-import useNavigateById from '../../hooks/useNavigateById';
-import React, { useEffect, useState } from "react";
-import {
-  Users,
-  Package,
-  Stethoscope,
-  FlaskConical,
-  ShoppingBag,
-  Calendar,
-  DollarSign,
-  TrendingUp,
-  Search,
-  Plus,
-  Filter,
-  Edit,
-  Trash2,
-  CheckCircle2,
-  XCircle,
-  ShieldCheck,
-  MoreVertical,
-  ChevronDown,
-} from "lucide-react";
-import Card from "../../components/common/Card";
-import Badge from "../../components/common/Badge";
-import Button from "../../components/common/Button";
-import Sidebar from "../../components/common/Sidebar";
-import AddProductModal from "./AddProductModal";
-import VerificationModal from "./VerificationModal";
-import { useQuery } from "@tanstack/react-query";
-import adminService from "../../services/adminService";
+import React, { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import LoaderScreen from "../../components/common/Loader";
+import { Search, Plus, Pencil, Trash2 } from "lucide-react";
 import AdminSidebar from "../../components/admin/AdminSidebar";
-import { useLocation } from "react-router-dom";
+import Card from "../../components/common/Card";
+import Button from "../../components/common/Button";
+import Badge from "../../components/common/Badge";
+import AddProductModal from "./AddProductModal";
+import adminService from "../../services/adminService";
+import ConfirmDeleteModal from "../../components/common/ConfirmDeleteModal";
 
 export default function AdminProductsPage() {
-  const onNavigate = useNavigateById();
-  const { user } = useSelector((state) => state.auth);
-
-  let { pathname } = useLocation();
-  let currentPath = pathname.split("/")[pathname.split("/").length - 1];
-
-  const [activeSection, setActiveSection] = useState("products");
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
-  const [verificationTarget, setVerificationTarget] = useState(null);
-
-  const { data, isLoading, isSuccess, isError, error } = useQuery({
-    queryKey: ["admin-data"],
-    queryFn: (payload) => adminService.fetchAllAdminData(user.token),
-  });
-
-  useEffect(() => {
-    if (isError && error) {
-      toast.error(error.response?.data?.message || error.message);
-    }
-  }, [isError, error, data, isSuccess]);
-
-  if (isLoading) {
-    return <LoaderScreen />;
-  }
-
-  return (
-    <div className="min-h-screen bg-slate-50 flex">
-      <AdminSidebar />
-
-      {/* Main Admin Area */}
-      <main className="flex-1 p-6 sm:p-10 space-y-8 overflow-x-hidden">
-        {/* Top Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-extrabold text-slate-900 capitalize">
-              {currentPath.toUpperCase()} OVERVIEW
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Live hospital operations, verification workflows, and
-              pharmaceutical stock control.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {activeSection === "products" && (
-              <Button
-                variant="primary"
-                size="sm"
-                icon={Plus}
-                onClick={() => setIsAddProductOpen(true)}>
-                Add New Product
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onNavigate("landing")}>
-              Exit to Patient Portal
-            </Button>
-          </div>
-        </div>
-
-        {/* Table Container Card */}
-        <Card className="p-6 border-slate-200 shadow-xs space-y-4">
-          {/* Table Search & Filter Toolbar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pb-3 border-b border-slate-100">
-            <div className="relative w-full sm:w-80">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder={`Search ${activeSection}...`}
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-teal-500"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">
-                <Filter className="w-3.5 h-3.5 text-slate-400" />
-                <span>Filters</span>
-              </button>
-            </div>
-          </div>
-
-          {/* DYNAMIC DATA TABLE BY SECTION */}
-          <div className="overflow-x-auto">
-            {/* 1. PRODUCTS TABLE */}
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-400 font-bold border-b border-slate-200">
-                <tr>
-                  <th className="py-3 px-4">Product Name</th>
-                  <th className="py-3 px-4">Price</th>
-                  <th className="py-3 px-4">Stock</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {data?.products?.map((row) => (
-                  <tr
-                    key={row._id}
-                    className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3 px-4 font-semibold text-slate-900">
-                      {row.name}
-                    </td>
-                    <td className="py-3 px-4 font-bold text-slate-900">
-                      {row.price}
-                    </td>
-                    <td className="py-3 px-4">{row.stock} units</td>
-
-                    <td className="py-3 px-4">
-                      <Badge variant={row.badgeVariant} size="sm" dot>
-                        {row.isActive ? "IN-STOCK" : "OUT-OF-STOCK"}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          className="p-1 hover:bg-slate-100 rounded text-slate-600"
-                          title="Edit">
-                          <Edit className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          className="p-1 hover:bg-rose-50 rounded text-rose-600"
-                          title="Delete">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      </main>
-
-      {/* MODAL: ADD PRODUCT */}
-      <AddProductModal
-        isOpen={isAddProductOpen}
-        onClose={() => setIsAddProductOpen(false)}
-        onSave={() => setIsAddProductOpen(false)}
-      />
-    </div>
-  );
+  const { user } = useSelector(s => s.auth); const qc = useQueryClient();
+  const [search, setSearch] = useState(""); const [category, setCategory] = useState("");
+  const [open, setOpen] = useState(false); const [editing, setEditing] = useState(null);
+  const [deleting, setDeleting] = useState(null);
+  const { data, isLoading, isError } = useQuery({ queryKey: ["admin-data"], queryFn: () => adminService.fetchAllAdminData(user.token), enabled: !!user?.token });
+  const del = useMutation({ mutationFn: id => adminService.deleteProduct(id, user.token), onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-data"] }); qc.invalidateQueries({ queryKey: ["admin-dashboard"] }); qc.invalidateQueries({ queryKey: ["public-data"] }); toast.success("Product removed from catalog"); setDeleting(null); }, onError: e => toast.error(e.response?.data?.message || e.message) });
+  const products = useMemo(() => data?.products?.filter(p => (!category || p.category === category) && `${p.name} ${p.category} ${p.description}`.toLowerCase().includes(search.toLowerCase())) || [], [data, search, category]);
+  const categories = [...new Set((data?.products || []).map(p => p.category).filter(Boolean))];
+  const openEdit = product => { setEditing(product); setOpen(true); };
+  const closeModal = () => { setOpen(false); setEditing(null); };
+  return <div className="min-h-screen bg-slate-50 flex"><AdminSidebar /><main className="flex-1 p-6 sm:p-10 space-y-6">
+    <header className="flex justify-between items-center"><div><h1 className="text-2xl font-extrabold">Products & Inventory</h1><p className="text-xs text-slate-500">Live catalog inventory and stock status.</p></div><Button icon={Plus} onClick={() => { setEditing(null); setOpen(true); }}>Add Product</Button></header>
+    <Card className="p-5"><div className="flex gap-3 mb-4"><div className="relative flex-1"><Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" /><input className="border rounded-xl pl-9 pr-3 py-2 w-full text-sm" placeholder="Search products" value={search} onChange={e => setSearch(e.target.value)} /></div><select className="border rounded-xl px-3" value={category} onChange={e => setCategory(e.target.value)}><option value="">All categories</option>{categories.map(c => <option key={c}>{c}</option>)}</select></div>
+    {isLoading ? <p>Loading products…</p> : isError ? <p className="text-rose-600">Could not load products.</p> : <div className="overflow-x-auto"><table className="w-full text-sm text-left"><thead><tr className="text-slate-500 border-b"><th className="p-3">Product</th><th className="p-3">Category</th><th className="p-3">Price</th><th className="p-3">Stock</th><th className="p-3">Status</th><th /></tr></thead><tbody>{products.map(p => <tr key={p._id} className="border-b"><td className="p-3"><div className="flex items-center gap-3"><img src={p.image} alt="" className="w-10 h-10 rounded object-cover" /><span>{p.name}</span></div></td><td className="p-3">{p.category}</td><td className="p-3">₹{p.price}</td><td className="p-3">{p.stock}</td><td className="p-3"><Badge variant={p.isActive && p.stock > 0 ? "success" : "warning"}>{!p.isActive ? "INACTIVE" : p.stock > 0 ? "IN STOCK" : "OUT OF STOCK"}</Badge></td><td className="p-3"><button title="Edit product" onClick={() => openEdit(p)} className="p-2"><Pencil size={16} /></button>{p.isActive && <button title="Remove product" onClick={() => setDeleting(p)} className="p-2 text-rose-600"><Trash2 size={16} /></button>}</td></tr>)}</tbody></table>{!products.length && <p className="p-6 text-center text-slate-500">No products found.</p>}</div>}</Card>
+    <AddProductModal isOpen={open} onClose={closeModal} product={editing} />
+    <ConfirmDeleteModal isOpen={!!deleting} entityName={deleting?.name} entityType="product" isDeleting={del.isPending} onCancel={()=>setDeleting(null)} onConfirm={()=>del.mutate(deleting._id)} />
+  </main></div>;
 }

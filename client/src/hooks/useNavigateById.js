@@ -9,7 +9,7 @@ export const ROUTES = {
   lab: '/lab',
   'product-detail': '/pharmacy',
   'doctor-booking': '/doctors',
-  'lab-booking': '/lab',
+  'lab-booking': '/lab/book',
   dashboard: '/auth/dashboard',
   orders: '/auth/orders',
   'my-appointments': '/auth/my-appointments',
@@ -25,9 +25,9 @@ export const ROUTES = {
 
 export default function useNavigateById() {
   const navigate = useNavigate();
-  return (id) => {
+  return (id, options) => {
     if (!id) return;
     const target = ROUTES[id] ?? (id.startsWith('/') ? id : `/${id}`);
-    navigate(target);
+    navigate(target, options);
   };
 }

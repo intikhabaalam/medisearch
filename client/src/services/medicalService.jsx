@@ -25,6 +25,8 @@ const fetchData = async () => {
 
 }
 
+const getDoctors = async () => (await axios.get("/api/doctor")).data;
+
 const searchMedicines = async (query) => {
     const response = await axios.get("/api/products/search", {
         params: { q: query || "" }
@@ -50,13 +52,17 @@ const getMyOrders = async (token) => {
     const response = await axios.get("/api/orders", authHeaders(token))
     return response.data
 }
+const getMyDoctorAppointments = async (token) => (await axios.get("/api/doctor/my-appointments", authHeaders(token))).data;
+const getMyLabAppointments = async (token) => (await axios.get("/api/pathologist/my-appointments", authHeaders(token))).data;
 
 const medicalService = {
     fetchData,
+    getDoctors,
     searchMedicines,
     getProductById,
     createOrder,
     getMyOrders
+    ,getMyDoctorAppointments, getMyLabAppointments
 }
 
 export default medicalService

@@ -1,24 +1,5 @@
-import React, { useState } from 'react'
-import {
-    Users,
-    Package,
-    Stethoscope,
-    FlaskConical,
-    ShoppingBag,
-    Calendar,
-    DollarSign,
-    TrendingUp,
-    Search,
-    Plus,
-    Filter,
-    Edit,
-    Trash2,
-    CheckCircle2,
-    XCircle,
-    ShieldCheck,
-    MoreVertical,
-    ChevronDown
-} from 'lucide-react';
+import React from 'react'
+import { Users, Package, Stethoscope, FlaskConical, ShoppingBag } from 'lucide-react';
 import Sidebar from '../common/Sidebar';
 import { useLocation } from 'react-router-dom';
 
@@ -35,6 +16,7 @@ const AdminSidebar = () => {
         { id: 'products', label: 'Products & Inventory', icon: Package },
         { id: 'doctors', label: 'Doctors & Licensure', icon: Stethoscope },
         { id: 'pathologists', label: 'Pathology Labs', icon: FlaskConical },
+        { id: 'tests', label: 'Lab Tests', icon: FlaskConical },
         { id: 'orders', label: 'Medicine Orders', icon: ShoppingBag },
         { id: 'users', label: 'Registered Users', icon: Users },
     ];

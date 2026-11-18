@@ -2,9 +2,8 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { Upload, X, ImagePlus } from "lucide-react";
-
-import axios from "axios";
+import toast from "react-hot-toast";
+import { ImagePlus } from "lucide-react";
 import Modal from "../../components/common/Modal";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
@@ -13,6 +12,7 @@ import adminService from "../../services/adminService";
 export default function AddProductModal({
   isOpen,
   onClose,
+  product = null,
 }) {
   const { user } = useSelector((state) => state.auth);
   const queryClient = useQueryClient();
@@ -22,11 +22,14 @@ export default function AddProductModal({
 
 
   const mutation = useMutation({
-    mutationFn: async (productData) => adminService.createProduct(productData, user.token),
+    mutationFn: async (productData) => product ? adminService.updateProduct(product._id, productData, user.token) : adminService.createProduct(productData, user.token),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["admin-data"],
       });
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["public-data"] });
+      toast.success(product ? "Product updated" : "Product added");
 
       handleClose();
     },
@@ -78,12 +81,13 @@ export default function AddProductModal({
     }
 
     const formData = new FormData(e.currentTarget);
+    formData.set("rxRequired", formData.get("requiresPrescription") === "true" ? "true" : "false");
 
     const price = Number(formData.get("price"));
     const stock = Number(formData.get("stock"));
 
-    if (!Number.isFinite(price) || price < 0) {
-      setFormError("Please enter a valid price.");
+    if (!Number.isFinite(price) || price <= 0) {
+      setFormError("Price must be greater than zero.");
       return;
     }
 
@@ -102,7 +106,7 @@ export default function AddProductModal({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Add New Pharmacy Product"
+      title={product ? "Edit Pharmacy Product" : "Add New Pharmacy Product"}
       subtitle="Enter pharmaceutical inventory details for the MediTrust catalog"
       maxWidth="max-w-2xl"
       footer={
@@ -143,10 +147,10 @@ export default function AddProductModal({
           </label>
 
           <label className="relative flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 p-5 text-center transition-colors hover:bg-slate-50">
-            {preview ? (
+            {preview || product?.image ? (
               <div className="relative">
                 <img
-                  src={preview}
+                  src={preview || product.image}
                   alt="Product preview"
                   className="h-32 w-32 rounded-xl object-cover"
                 />
@@ -173,7 +177,7 @@ export default function AddProductModal({
               type="file"
               name="image"
               accept="image/png,image/jpeg"
-              required
+              required={!product}
               className="sr-only"
               onChange={handleImageChange}
             />
@@ -187,6 +191,7 @@ export default function AddProductModal({
             name="name"
             placeholder="e.g. Amoxicillin Trihydrate"
             required
+            defaultValue={product?.name || ""}
           />
 
           <Input
@@ -194,6 +199,7 @@ export default function AddProductModal({
             name="manufacturer"
             placeholder="e.g. Novartis Healthcare"
             required
+            defaultValue={product?.manufacturer || ""}
           />
         </div>
 
@@ -207,7 +213,7 @@ export default function AddProductModal({
             <select
               name="category"
               required
-              defaultValue="Prescription Drugs"
+              defaultValue={product?.category || "Prescription Drugs"}
               className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none"
             >
               <option value="Prescription Drugs">
@@ -229,13 +235,14 @@ export default function AddProductModal({
           </div>
 
           <Input
-            label="Unit Price ($)"
+            label="Unit Price (₹)"
             name="price"
             type="number"
             min="0"
             step="0.01"
             placeholder="18.50"
             required
+            defaultValue={product?.price ?? ""}
           />
 
           <Input
@@ -246,6 +253,7 @@ export default function AddProductModal({
             step="1"
             placeholder="250"
             required
+            defaultValue={product?.stock ?? ""}
           />
         </div>
 
@@ -260,6 +268,7 @@ export default function AddProductModal({
             name="expiresOn"
             required
             min={new Date().toISOString().split("T")[0]}
+            defaultValue={product?.expiresOn || ""}
             className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none"
           />
         </div>
@@ -274,6 +283,7 @@ export default function AddProductModal({
             name="description"
             rows={3}
             required
+            defaultValue={product?.description || ""}
             placeholder="Brief overview of drug class and primary clinical indications..."
             className="w-full rounded-xl border border-slate-200 p-3 text-sm text-slate-800 focus:border-teal-500 focus:outline-none"
           />
@@ -286,6 +296,7 @@ export default function AddProductModal({
               type="checkbox"
               name="requiresPrescription"
               value="true"
+              defaultChecked={Boolean(product?.rxRequired)}
               className="rounded text-teal-600 focus:ring-teal-500"
             />
 
@@ -307,7 +318,7 @@ export default function AddProductModal({
 
         {mutation.isSuccess && (
           <p className="text-sm text-teal-700">
-            Product created successfully.
+            Product {product ? "updated" : "created"} successfully.
           </p>
         )}
       </form>

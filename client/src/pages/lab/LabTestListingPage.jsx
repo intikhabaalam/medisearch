@@ -3,15 +3,7 @@ import React, { useState } from 'react';
 import {
   Search,
   FlaskConical,
-  Clock,
-  ShieldCheck,
-  AlertCircle,
-  CheckCircle2,
   Home,
-  Building2,
-  ArrowRight,
-  FileSpreadsheet,
-  Award
 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Badge from '../../components/common/Badge';
@@ -20,23 +12,14 @@ import { useQuery } from '@tanstack/react-query';
 import medicalService from '../../services/medicalService';
 import Loader from '../../components/common/Loader';
 
-const MOCK_CATEGORIES = [
-  'All Lab Tests',
-  'Full Body Checkups',
-  'Diabetes & Sugar',
-  'Thyroid Profile',
-  'Lipid & Heart Health',
-  'Liver & Renal Function',
-  'Vitamin Deficiencies',
-  'Infectious Disease',
-];
-
-
 export default function LabTestListingPage() {
   const onNavigate = useNavigateById();
   const [selectedCategory, setSelectedCategory] = useState('All Lab Tests');
+  const [search, setSearch] = useState('');
 
-  const { data, isLoading, isSuccess, isError, error } = useQuery({ queryKey: ['public-data'], queryFn: medicalService.fetchData })
+  const { data, isLoading, isError, error } = useQuery({ queryKey: ['public-data'], queryFn: medicalService.fetchData })
+  const categories = ['All Lab Tests', ...new Set((data?.tests || []).map(test => test.category).filter(Boolean))];
+  const visibleTests = (data?.tests || []).filter(test => (selectedCategory === 'All Lab Tests' || (test.category || 'General') === selectedCategory) && `${test.title} ${test.description} ${test.category || ''}`.toLowerCase().includes(search.toLowerCase()));
 
 
 
@@ -100,18 +83,20 @@ export default function LabTestListingPage() {
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
             placeholder="Search lab test by name, parameter, or disease profile..."
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm placeholder-slate-400 focus:outline-none focus:border-teal-500"
           />
         </div>
-        <Button variant="primary" size="md" className="w-full md:w-auto">
+        <Button variant="primary" size="md" className="w-full md:w-auto" onClick={() => setSearch(search.trim())}>
           Search Tests
         </Button>
       </div>
 
       {/* Category Filter Chips */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-        {MOCK_CATEGORIES.map((cat) => {
+        {categories.map((cat) => {
           const isActive = selectedCategory === cat;
           return (
             <button
@@ -133,7 +118,7 @@ export default function LabTestListingPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-            Available Diagnostic Tests ({data.tests.length})
+            Available Diagnostic Tests ({visibleTests.length})
           </span>
           <span className="text-xs text-teal-700 font-semibold flex items-center gap-1.5">
             <Home className="w-4 h-4" /> Home sample collection available across 150+ postal codes
@@ -141,14 +126,14 @@ export default function LabTestListingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {data.tests.map((test) => (
+          {visibleTests.map((test) => (
             <Card key={test._id} hoverEffect className="p-6 flex flex-col justify-between h-full">
               <div>
 
                 {/* Header */}
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <Badge variant="info" size="sm">
-                    {test.title}
+                    {test.category || 'General'}
                   </Badge>
                 </div>
 
@@ -158,6 +143,8 @@ export default function LabTestListingPage() {
                 <p className="text-xs text-slate-500 mt-2 leading-relaxed">
                   {test.description}
                 </p>
+                {test.preparationInstructions && <p className="text-xs text-amber-800 bg-amber-50 rounded-lg p-2 mt-3"><strong>Preparation:</strong> {test.preparationInstructions}</p>}
+                {test.pathologist && <p className="text-xs text-slate-500 mt-2"><strong>Laboratory:</strong> {test.pathologist.laboratoryName}</p>}
 
 
               </div>
@@ -166,13 +153,13 @@ export default function LabTestListingPage() {
               <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                 <div>
 
-                  <span className="text-xl font-black text-slate-900">${test.price.toFixed(2)}</span>
+                  <span className="text-xl font-black text-slate-900">₹{Number(test.price).toFixed(2)}</span>
                 </div>
 
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => onNavigate('lab-booking')}
+                  onClick={() => onNavigate('lab-booking', { state: { test } })}
                   icon={FlaskConical}
                 >
                   Book Test

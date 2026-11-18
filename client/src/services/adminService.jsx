@@ -35,11 +35,19 @@ const fetchAllAdminData = async (payload) => {
     return data
 
 }
+const headers = (token) => ({ headers: { Authorization: `Bearer ${token}` } });
+const getDashboard = async (token) => (await axios.get("/api/admin/dashboard", headers(token))).data;
+const getTests = async (token) => (await axios.get("/api/admin/tests", headers(token))).data;
+const saveTest = async (test, token, id) => (await axios({ method: id ? "put" : "post", url: `/api/admin/tests${id ? `/${id}` : ""}`, data: test, ...headers(token) })).data;
+const deleteTest = async (id, token) => (await axios.delete(`/api/admin/tests/${id}`, headers(token))).data;
+const updatePathologist = async (id, isVerified, token) => (await axios.put(`/api/admin/pathologists/${id}`, { isVerified }, headers(token))).data;
+const updateOrder = async (id, status, token) => (await axios.put(`/api/admin/orders/${id}`, { status }, headers(token))).data;
+const updateUser = async (id, isActive, token) => (await axios.put(`/api/admin/users/${id}`, { isActive }, headers(token))).data;
+const updateProduct = async (id, payload, token) => (await axios.put(`/api/admin/product/${id}`, payload, headers(token))).data;
+const deleteProduct = async (id, token) => (await axios.delete(`/api/admin/product/${id}`, headers(token))).data;
 
 
 const createProduct = async (productData, token) => {
-
-
     const response = await axios.post(
         "/api/admin/product",
         productData,
@@ -53,11 +61,28 @@ const createProduct = async (productData, token) => {
     return response.data;
 }
 
+const updateDoctor = async (doctorId, isVerified, token) => {
+    const response = await axios.put(
+        `/api/admin/doctor/${doctorId}`,
+        { isVerified },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    return response.data;
+};
+
 
 
 const adminService = {
     fetchAllAdminData,
-    createProduct
+    createProduct,
+    updateDoctor
+    ,getDashboard, getTests, saveTest, deleteTest, updatePathologist, updateOrder, updateUser, updateProduct, deleteProduct
+
 }
 
 

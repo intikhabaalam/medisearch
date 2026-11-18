@@ -1,32 +1,13 @@
-import useNavigateById from '../../hooks/useNavigateById';
 import React, { useEffect, useState } from "react";
 import {
-  Users,
-  Package,
-  Stethoscope,
-  FlaskConical,
-  ShoppingBag,
-  Calendar,
-  DollarSign,
-  TrendingUp,
   Search,
-  Plus,
   Filter,
-  Edit,
-  Trash2,
-  CheckCircle2,
-  XCircle,
-  ShieldCheck,
-  MoreVertical,
-  ChevronDown,
 } from "lucide-react";
 import Card from "../../components/common/Card";
 import Badge from "../../components/common/Badge";
 import Button from "../../components/common/Button";
-import Sidebar from "../../components/common/Sidebar";
-import AddProductModal from "./AddProductModal";
 import VerificationModal from "./VerificationModal";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import adminService from "../../services/adminService";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
@@ -35,20 +16,23 @@ import AdminSidebar from "../../components/admin/AdminSidebar";
 import { useLocation } from "react-router-dom";
 
 export default function AdminPathologistsPage() {
-  const onNavigate = useNavigateById();
   const { user } = useSelector((state) => state.auth);
 
   let { pathname } = useLocation();
   let currentPath = pathname.split("/")[pathname.split("/").length - 1];
 
-  const [activeSection, setActiveSection] = useState("Pathologist");
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const activeSection = "Pathologist";
   const [verificationTarget, setVerificationTarget] = useState(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isSuccess, isError, error } = useQuery({
     queryKey: ["admin-data"],
-    queryFn: (payload) => adminService.fetchAllAdminData(user.token),
+    queryFn: () => adminService.fetchAllAdminData(user.token),
   });
+  const mutation = useMutation({ mutationFn: isVerified => adminService.updatePathologist(verificationTarget._id, isVerified, user.token), onSuccess: () => { toast.success("Lab verification updated"); setVerificationTarget(null); queryClient.invalidateQueries({ queryKey:["admin-data"] }); queryClient.invalidateQueries({ queryKey:["admin-dashboard"] }); queryClient.invalidateQueries({ queryKey:["public-data"] }); }, onError:e=>toast.error(e.response?.data?.message||e.message) });
+  const labs = (data?.pathologists || []).filter(l => (!statusFilter || (l.isVerified ? "approved" : l.verificationStatus || "pending") === statusFilter) && `${l.laboratoryName} ${l.registrationNumber} ${l.laboratoryAddress} ${l.email} ${l.phone} ${(l.specialization||[]).join(" ")}`.toLowerCase().includes(search.toLowerCase()));
 
   useEffect(() => {
     if (isError && error) {
@@ -84,7 +68,7 @@ export default function AdminPathologistsPage() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pb-3 border-b border-slate-100">
             <div className="relative w-full sm:w-80">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
+              <input value={search} onChange={e=>setSearch(e.target.value)}
                 type="text"
                 placeholder={`Search ${activeSection}...`}
                 className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-teal-500"
@@ -92,6 +76,7 @@ export default function AdminPathologistsPage() {
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)} className="border border-slate-200 rounded-xl px-3 py-2 text-xs"><option value="">All applications</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select>
               <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">
                 <Filter className="w-3.5 h-3.5 text-slate-400" />
                 <span>Filters</span>
@@ -106,6 +91,7 @@ export default function AdminPathologistsPage() {
               <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-400 font-bold border-b border-slate-200">
                 <tr>
                   <th className="py-3 px-4">Laboratory Center</th>
+                  <th className="py-3 px-4">Registration No.</th>
                   <th className="py-3 px-4">Specializations</th>
                   <th className="py-3 px-4">Address</th>
                   <th className="py-3 px-4">Status</th>
@@ -113,18 +99,19 @@ export default function AdminPathologistsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {data?.pathologists?.map((row) => (
+                {labs.map((row) => (
                   <tr
                     key={row._id}
                     className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3 px-4 font-semibold text-slate-900">
                       {row.laboratoryName}
                     </td>
-                    <td className="py-3 px-4">{row.specialization}</td>
+                    <td className="py-3 px-4 font-mono">{row.registrationNumber}</td>
+                    <td className="py-3 px-4">{(row.specialization||[]).join(", ")}</td>
                     <td className="py-3 px-4">{row.laboratoryAddress}</td>
                     <td className="py-3 px-4">
-                      <Badge variant={row.badgeVariant} size="sm" dot>
-                        {row.isVerified ? "VERIFIED" : "NOT-VERIFIED"}
+                      <Badge variant={row.isVerified ? "success" : row.verificationStatus === "rejected" ? "danger" : "warning"} size="sm" dot>
+                        {row.isVerified ? "APPROVED" : row.verificationStatus === "rejected" ? "REJECTED" : "PENDING"}
                       </Badge>
                     </td>
                     <td className="py-3 px-4 text-right">
@@ -154,8 +141,9 @@ export default function AdminPathologistsPage() {
         onClose={() => setVerificationTarget(null)}
         item={verificationTarget}
         type={verificationTarget?.type}
-        onApprove={() => setVerificationTarget(null)}
-        onReject={() => setVerificationTarget(null)}
+        onApprove={() => mutation.mutate(true)}
+        onReject={() => mutation.mutate(false)}
+        isSaving={mutation.isPending}
       />
     </div>
   );

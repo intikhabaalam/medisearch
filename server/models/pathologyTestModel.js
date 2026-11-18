@@ -18,6 +18,9 @@ const pathologyTestSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    category: { type: String, trim: true, default: "General" },
+    preparationInstructions: { type: String, trim: true, default: "" },
+    isAvailable: { type: Boolean, default: true },
 
 
 }, {
