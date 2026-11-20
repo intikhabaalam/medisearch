@@ -6,6 +6,8 @@ const becomeDoctor = async (req, res) => {
 
     let userId = req.user.id
 
+    if (req.user.userType !== "USER") return res.status(403).json({ message: "Only a patient account can submit a doctor application" });
+
 
     const { clinicName, address, qualification, registrationNumber, experience, specialization, phone, email, consultationFee, workingHours, availableDays } = req.body
 
@@ -45,8 +47,9 @@ const getAllAppointments = async (req, res) => {
         throw new Error("You Are Not Doctor")
     }
 
-    const doctor = await Doctor.findOne({ user: user._id })
-    const appointments = await DoctorAppointment.find({ doctor: doctor._id }).populate('user')
+    const doctor = await Doctor.findOne({ user: user._id, isVerified: true, isActive: true })
+    if (!doctor) return res.status(403).json({ message: "Verified doctor profile not found" })
+    const appointments = await DoctorAppointment.find({ doctor: doctor._id }).populate('user', 'name email phone').sort({ createdAt: -1 })
 
     if (!appointments) {
         res.status(404)

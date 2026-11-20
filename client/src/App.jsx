@@ -32,6 +32,7 @@ import AiChatPage from './pages/ai/AiChatPage';
 import PrescriptionExplainerPage from './pages/ai/PrescriptionExplainerPage';
 import FindMedicinesBySymptomPage from './pages/ai/FindMedicinesBySymptomPage';
 import UserDashboardPage from './pages/dashboard/UserDashboardPage';
+import DoctorDashboardPage from './pages/dashboard/DoctorDashboardPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import PrivateComponent from './components/PrivateComponent';
 import { useSelector } from 'react-redux';
@@ -74,6 +75,7 @@ export default function App() {
           <Route path="/orders" element={<Navigate to="/auth/orders" replace />} />
           <Route path='/auth' element={<PrivateComponent />}>
             <Route path="dashboard" element={<UserDashboardPage />} />
+            <Route path="doctor-dashboard" element={<DoctorDashboardPage />} />
             <Route path="orders" element={<MyOrdersPage />} />
             <Route path="my-appointments" element={<MyAppointmentsPage />} />
             <Route path="my-lab-appointments" element={<MyLabAppointmentsPage />} />

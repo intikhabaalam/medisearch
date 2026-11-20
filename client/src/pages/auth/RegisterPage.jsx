@@ -19,6 +19,8 @@ import authService from '../../services/authService';
 import Loader from '../../components/common/Loader';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { register as setAuthenticatedUser } from '../../features/auth/authSlice';
 
 export default function RegisterPage() {
   const onNavigate = useNavigateById();
@@ -26,6 +28,7 @@ export default function RegisterPage() {
   const { mutate, data, isPending, isSuccess, isError, error } = useMutation({ mutationFn: (payload) => authService.registerUser(payload) })
 
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -53,16 +56,17 @@ export default function RegisterPage() {
 
   useEffect(() => {
 
-    if (data) {
+    if (data && isSuccess) {
       toast.success(data.message)
-      navigate("/login")
+      dispatch(setAuthenticatedUser(data))
+      navigate(data.userType === "DOCTOR" ? "/auth/doctor-dashboard" : "/auth/dashboard", { replace: true })
     }
 
     if (isError) {
       toast.error(error.response?.data?.message || error.message)
     }
 
-  }, [isError, error, data])
+  }, [isError, error, data, isSuccess, dispatch, navigate])
 
 
 

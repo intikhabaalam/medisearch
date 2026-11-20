@@ -53,6 +53,8 @@ const getMyOrders = async (token) => {
     return response.data
 }
 const getMyDoctorAppointments = async (token) => (await axios.get("/api/doctor/my-appointments", authHeaders(token))).data;
+const getDoctorAppointments = async (token) => (await axios.get("/api/doctor/appointments", authHeaders(token))).data;
+const updateDoctorAppointment = async ({ token, id, status }) => (await axios.put(`/api/doctor/appointments/${id}`, { status }, authHeaders(token))).data;
 const getMyLabAppointments = async (token) => (await axios.get("/api/pathologist/my-appointments", authHeaders(token))).data;
 
 const medicalService = {
@@ -62,7 +64,7 @@ const medicalService = {
     getProductById,
     createOrder,
     getMyOrders
-    ,getMyDoctorAppointments, getMyLabAppointments
+    ,getMyDoctorAppointments, getMyLabAppointments, getDoctorAppointments, updateDoctorAppointment
 }
 
 export default medicalService

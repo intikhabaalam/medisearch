@@ -13,9 +13,16 @@ const registerUser = async (req, res) => {
     }
 
 
-    // Check if user exist
-    const emailExist = await User.findOne({ email })
-    const phoneExist = await User.findOne({ phone })
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPhone = phone.trim();
+    if (password.length < 8) {
+        res.status(400)
+        throw new Error("Password must be at least 8 characters")
+    }
+
+    // Check if user exists using the normalized values that are stored.
+    const emailExist = await User.findOne({ email: normalizedEmail })
+    const phoneExist = await User.findOne({ phone: normalizedPhone })
 
 
     if (emailExist || phoneExist) {
@@ -28,7 +35,7 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
 
-    const user = await User.create({ name, email, phone, password: hashedPassword })
+    const user = await User.create({ name: name.trim(), email: normalizedEmail, phone: normalizedPhone, password: hashedPassword })
 
     if (!user) {
         res.status(409)
@@ -37,7 +44,14 @@ const registerUser = async (req, res) => {
 
 
     res.status(201).json({
-        message: "Account Succesfully Has Been Created!"
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        userType: user.userType,
+        createdAt: user.createdAt,
+        token: generateToken(user._id),
+        message: "Account successfully created"
     })
 }
 
@@ -52,10 +66,11 @@ const loginUser = async (req, res) => {
     }
 
     // Check if user exists
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email: email.trim().toLowerCase() })
 
-    if (user && await bcrypt.compare(password, user.password)) {
+    if (user?.isActive && await bcrypt.compare(password, user.password)) {
         res.status(200).json({
+            _id: user._id,
             name: user.name,
             email: user.email,
             phone: user.phone,

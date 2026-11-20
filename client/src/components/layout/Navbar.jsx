@@ -48,7 +48,7 @@ export default function Navbar() {
     { id: 'auth/ai-hub', label: 'AI Health', icon: Sparkles, isAi: true },
     { id: 'auth/orders', label: 'My Orders', icon: Package },
     user?.userType === "ADMIN" ? { id: 'auth/admin', label: 'Admin', icon: ShieldAlert } :
-      { id: 'auth/dashboard', label: 'Dashboard', icon: User }
+      { id: user?.userType === "DOCTOR" ? 'auth/doctor-dashboard' : 'auth/dashboard', label: 'Dashboard', icon: User }
   ] : [
     { id: 'pharmacy', label: 'Pharmacy', icon: Pill },
     { id: 'doctors', label: 'Doctors', icon: Calendar },

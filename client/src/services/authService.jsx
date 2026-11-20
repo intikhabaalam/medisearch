@@ -3,6 +3,7 @@ import axios from "axios"
 
 const registerUser = async (formData) => {
     const response = await axios.post("/api/auth/register", formData)
+    localStorage.setItem("user", JSON.stringify(response.data))
     return response.data
 }
 

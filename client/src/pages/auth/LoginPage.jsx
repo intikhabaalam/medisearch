@@ -13,7 +13,7 @@ import {
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import Loader from '../../components/common/Loader';
 import authService from '../../services/authService';
@@ -31,6 +31,7 @@ export default function LoginPage() {
 
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
 
 
   const [formData, setFormData] = useState({
@@ -58,11 +59,9 @@ export default function LoginPage() {
     if (data && isSuccess) {
       toast.success("You have been logged in")
       dispatch(register(data))
-      if (data.userType === "ADMIN") {
-        navigate("/auth/admin")
-      } else {
-        navigate("/auth/dashboard")
-      }
+      const fallback = data.userType === "ADMIN" ? "/auth/admin" : data.userType === "DOCTOR" ? "/auth/doctor-dashboard" : "/auth/dashboard"
+      const destination = location.state?.from?.pathname || location.state?.from || fallback
+      navigate(destination === "/login" ? fallback : destination, { replace: true })
     }
 
 
@@ -70,7 +69,7 @@ export default function LoginPage() {
       toast.error(error.response?.data?.message || error.message)
     }
 
-  }, [isError, error, data, isSuccess])
+  }, [isError, error, data, isSuccess, dispatch, navigate, location.state])
 
 
 
