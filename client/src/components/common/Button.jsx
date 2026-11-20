@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Reusable Button component for MediTrust UI.
+ * Reusable Button component for MediSearch UI.
  * Pure Tailwind CSS utility classes.
  * 
  * @param {'primary'|'secondary'|'outline'|'ghost'|'danger'|'ai'} variant

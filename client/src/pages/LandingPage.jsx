@@ -2,7 +2,6 @@ import useNavigateById from '../hooks/useNavigateById';
 import React from "react";
 import {
   Search,
-  MapPin,
   Star,
   ShieldCheck,
   Clock,
@@ -11,19 +10,14 @@ import {
   Pill,
   FlaskConical,
   Sparkles,
-  UserCheck,
-  HeartHandshake,
   Award,
-  ChevronRight,
-  TrendingUp,
   Stethoscope,
   Activity,
 } from "lucide-react";
 import Card from "../components/common/Card";
 import Badge from "../components/common/Badge";
 import Button from "../components/common/Button";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import productServices from "../services/medicalService";
+import { useQuery } from "@tanstack/react-query";
 import medicalService from "../services/medicalService";
 import Loader from "../components/common/Loader";
 
@@ -62,7 +56,7 @@ const MOCK_CATEGORIES = [
   },
   {
     id: "ai-hub",
-    name: "MediTrust AI Suite",
+    name: "MediSearch AI Suite",
     desc: "Instant prescription explainer, symptom analyzer & 24/7 clinical AI triage",
     icon: Sparkles,
     badge: "AI Powered",
@@ -73,70 +67,11 @@ const MOCK_CATEGORIES = [
   },
 ];
 
-const MOCK_FEATURED_DOCTORS = [
-  {
-    id: "doc-1",
-    name: "Dr. Sarah Jenkins, MD",
-    specialty: "Cardiologist",
-    experience: "14 yrs exp.",
-    hospital: "Mount Sinai Heart Center",
-    rating: 4.9,
-    reviewsCount: 382,
-    fee: "$95",
-    nextAvailable: "Today, 3:30 PM",
-    image:
-      "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400",
-    verified: true,
-  },
-  {
-    id: "doc-2",
-    name: "Dr. Marcus Vance, DO",
-    specialty: "Dermatologist",
-    experience: "11 yrs exp.",
-    hospital: "Boston Skin & Wellness Clinic",
-    rating: 4.8,
-    reviewsCount: 260,
-    fee: "$85",
-    nextAvailable: "Tomorrow, 10:00 AM",
-    image:
-      "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400",
-    verified: true,
-  },
-  {
-    id: "doc-3",
-    name: "Dr. Elena Rostova, MD",
-    specialty: "Pediatric Specialist",
-    experience: "16 yrs exp.",
-    hospital: "Children's Health Pavilion",
-    rating: 5.0,
-    reviewsCount: 440,
-    fee: "$90",
-    nextAvailable: "Today, 5:15 PM",
-    image:
-      "https://images.unsplash.com/photo-1594824813576-9694c979d50a?auto=format&fit=crop&q=80&w=400",
-    verified: true,
-  },
-  {
-    id: "doc-4",
-    name: "Dr. David Kim, MBBS",
-    specialty: "Neurologist",
-    experience: "12 yrs exp.",
-    hospital: "Metropolitan Neuro Institute",
-    rating: 4.9,
-    reviewsCount: 310,
-    fee: "$110",
-    nextAvailable: "Wed, 11:30 AM",
-    image:
-      "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400",
-    verified: true,
-  },
-];
-
 const MOCK_TESTIMONIALS = [
   {
     id: 1,
     quote:
-      "MediTrust made managing my elderly mother's prescriptions and monthly blood tests effortless. The home sample collector arrived right at 7:30 AM and reports were ready by evening.",
+      "MediSearch made managing my elderly mother's prescriptions and monthly blood tests effortless. The home sample collector arrived right at 7:30 AM and reports were ready by evening.",
     author: "Clara Montgomery",
     title: "Verified Patient • New York",
     avatar:
@@ -158,7 +93,7 @@ const MOCK_TESTIMONIALS = [
   {
     id: 3,
     quote:
-      "Finding a board-certified dermatologist and completing a HD video consultation within 20 minutes was incredible. MediTrust sets the standard for modern telehealth.",
+      "Finding a board-certified dermatologist and completing a HD video consultation within 20 minutes was incredible. MediSearch sets the standard for modern telehealth.",
     author: "Dr. Rebecca Chen",
     title: "Healthcare Analyst • Seattle",
     avatar:
@@ -170,7 +105,7 @@ const MOCK_TESTIMONIALS = [
 
 export default function LandingPage() {
   const onNavigate = useNavigateById();
-  const { data, isLoading, isSuccess, isError, error } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["public-data"],
     queryFn: medicalService.fetchData,
   });
@@ -585,7 +520,7 @@ export default function LandingPage() {
                 Confused by Your Prescription or Symptoms?
               </h2>
               <p className="text-slate-300 text-sm sm:text-base max-w-2xl leading-relaxed">
-                MediTrust AI safely analyzes medication instructions, deciphers
+                MediSearch AI safely analyzes medication instructions, deciphers
                 handwriting, breaks down potential drug interactions, and helps
                 guide your next clinical step.
               </p>
@@ -638,7 +573,7 @@ export default function LandingPage() {
             Trusted by Over 50,000 Families
           </h2>
           <p className="text-slate-600 text-sm mt-2">
-            Read authentic experiences from patients who rely on MediTrust for
+            Read authentic experiences from patients who rely on MediSearch for
             their healthcare journey.
           </p>
         </div>

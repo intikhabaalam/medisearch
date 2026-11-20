@@ -4,12 +4,10 @@ import {
   Sparkles, 
   Send, 
   Paperclip, 
-  Mic, 
   Bot, 
   User, 
   RotateCcw, 
-  Stethoscope,
-  AlertCircle
+  Stethoscope
 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Badge from '../../components/common/Badge';
@@ -29,7 +27,7 @@ const INITIAL_MESSAGES = [
   {
     id: 1,
     sender: 'ai',
-    text: "Hello! I am MediTrust's Clinical AI Assistant. I can help interpret laboratory numbers, explain prescription instructions, or evaluate mild symptoms to guide your care.",
+    text: "Hello! I am MediSearch's Clinical AI Assistant. I can help interpret laboratory numbers, explain prescription instructions, or evaluate mild symptoms to guide your care.",
     time: '10:14 AM',
     sources: ['UpToDate Clinical Consensus', 'Mayo Clinic Evidence Base'],
   },
@@ -79,7 +77,7 @@ export default function AiChatPage() {
       const aiText = response.data?.text || (typeof response.data === 'string' ? response.data : 'Thank you. Please consult a doctor for personalized care.');
       const aiSources = Array.isArray(response.data?.sources) && response.data.sources.length > 0 
         ? response.data.sources 
-        : ['MediTrust Clinical Knowledgebase'];
+        : ['MediSearch Clinical Knowledgebase'];
 
       const aiMsg = {
         id: Date.now() + 1,
@@ -92,7 +90,7 @@ export default function AiChatPage() {
       setMessages((prev) => [...prev, aiMsg]);
     } catch (err) {
       console.error('Chat error:', err);
-      const errMsg = err.response?.data?.error || err.response?.data?.message || 'Unable to connect to MediTrust AI Assistant. Please check your connection.';
+      const errMsg = err.response?.data?.error || err.response?.data?.message || 'Unable to connect to MediSearch AI Assistant. Please check your connection.';
       toast.error(errMsg);
 
       const errorMsg = {
@@ -135,7 +133,7 @@ export default function AiChatPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold text-slate-900">MediTrust AI Clinical Companion</h1>
+              <h1 className="text-base font-bold text-slate-900">MediSearch AI Clinical Companion</h1>
               <Badge variant="purple" size="sm" dot>
                 Gemini 2.5 Active
               </Badge>
@@ -244,7 +242,7 @@ export default function AiChatPage() {
               <div className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '0ms' }} />
               <div className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '150ms' }} />
               <div className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '300ms' }} />
-              <span className="text-xs text-slate-400 font-medium ml-1.5">MediTrust AI is formulating medical guidance...</span>
+              <span className="text-xs text-slate-400 font-medium ml-1.5">MediSearch AI is formulating medical guidance...</span>
             </div>
           </div>
         )}
@@ -268,7 +266,7 @@ export default function AiChatPage() {
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask MediTrust AI about medicines, symptoms, or test results... (Shift+Enter for newline)"
+          placeholder="Ask MediSearch AI about medicines, symptoms, or test results... (Shift+Enter for newline)"
           className="flex-1 bg-transparent border-0 text-sm text-slate-800 placeholder-slate-400 focus:outline-none px-2 resize-none max-h-24 py-1"
           disabled={isLoading}
         />

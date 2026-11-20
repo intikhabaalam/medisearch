@@ -107,7 +107,7 @@ export default function AddProductModal({
       isOpen={isOpen}
       onClose={handleClose}
       title={product ? "Edit Pharmacy Product" : "Add New Pharmacy Product"}
-      subtitle="Enter pharmaceutical inventory details for the MediTrust catalog"
+      subtitle="Enter pharmaceutical inventory details for the MediSearch catalog"
       maxWidth="max-w-2xl"
       footer={
         <>

@@ -31,8 +31,9 @@ const Loader = () => {
                 {/* Brand */}
                 <div className="text-center">
                     <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                        Medi<span className="text-teal-600">Trust</span>
+                        Medi<span className="text-teal-600">Search</span>
                     </h1>
+
 
                     <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.25em] text-slate-400">
                         Healthcare Made Simple

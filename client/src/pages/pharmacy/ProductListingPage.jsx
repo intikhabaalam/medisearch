@@ -24,6 +24,7 @@ const MOCK_CATEGORIES = [
   'Cardiac Care',
   'Skin & Dermatology',
 ];
+const EMPTY_MEDICINES = [];
 
 export default function ProductListingPage() {
   const onNavigate = useNavigateById();
@@ -44,7 +45,7 @@ export default function ProductListingPage() {
     placeholderData: (previous) => previous
   });
 
-  const medicines = data?.medicines || [];
+  const medicines = data?.medicines ?? EMPTY_MEDICINES;
 
   const filtered = useMemo(() => {
     let list = [...medicines];
@@ -83,7 +84,7 @@ export default function ProductListingPage() {
             Express Medicine Dispatch
           </Badge>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            MediTrust Online Pharmacy
+            MediSearch Online Pharmacy
           </h1>
           <p className="text-teal-100 text-sm sm:text-base leading-relaxed">
             Order authentic prescription and over-the-counter medications directly to your doorstep. Free delivery on orders above $35.

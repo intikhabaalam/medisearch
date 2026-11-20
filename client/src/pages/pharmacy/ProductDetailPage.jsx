@@ -162,7 +162,7 @@ export default function ProductDetailPage() {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-indigo-950">MediTrust AI Prescription Check</h4>
+              <h4 className="text-xs font-bold text-indigo-950">MediSearch AI Prescription Check</h4>
               <p className="text-xs text-indigo-800/80 mt-0.5">
                 Have an active doctor's prescription slip? Upload it to auto-verify dosage instructions.
               </p>

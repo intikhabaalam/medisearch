@@ -124,7 +124,7 @@ export default function MyOrdersPage() {
               icon={ArrowRight}
               iconPosition="right"
             >
-              Explore MediTrust Pharmacy
+              Explore MediSearch Pharmacy
             </Button>
           </div>
         </Card>

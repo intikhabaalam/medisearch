@@ -1,13 +1,10 @@
 import useNavigateById from '../../hooks/useNavigateById';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Sparkles, 
   Search, 
-  Activity, 
   AlertCircle, 
   Pill, 
-  ArrowRight, 
-  CheckCircle2, 
   Stethoscope, 
   Star,
   Loader2
@@ -35,11 +32,14 @@ export default function FindMedicinesBySymptomPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [searchError, setSearchError] = useState(null);
+  const searchInProgress = useRef(false);
+  const initialSearchStarted = useRef(false);
 
-  const handleSearch = async (symptomQuery) => {
+  const handleSearch = useCallback(async (symptomQuery) => {
     const q = typeof symptomQuery === 'string' ? symptomQuery : query;
-    if (!q || !q.trim() || isLoading) return;
+    if (!q || !q.trim() || searchInProgress.current) return;
 
+    searchInProgress.current = true;
     setIsLoading(true);
     setSearchError(null);
 
@@ -60,14 +60,17 @@ export default function FindMedicinesBySymptomPage() {
       setSearchError(errMsg);
       toast.error(errMsg);
     } finally {
+      searchInProgress.current = false;
       setIsLoading(false);
     }
-  };
+  }, [query, user]);
 
   // Perform initial search for default symptom on first load
   useEffect(() => {
-    handleSearch('Acid Reflux & Heartburn');
-  }, []);
+    if (initialSearchStarted.current) return;
+    initialSearchStarted.current = true;
+    queueMicrotask(() => handleSearch('Acid Reflux & Heartburn'));
+  }, [handleSearch]);
 
   const handleChipClick = (sym) => {
     setQuery(sym);
@@ -155,7 +158,7 @@ export default function FindMedicinesBySymptomPage() {
           <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/20 animate-spin">
             <Sparkles className="w-6 h-6" />
           </div>
-          <p className="text-sm font-semibold text-slate-700">Searching MediTrust Pharmacy & Evaluating Clinical Guidance...</p>
+          <p className="text-sm font-semibold text-slate-700">Searching MediSearch Pharmacy & Evaluating Clinical Guidance...</p>
           <p className="text-xs text-slate-400">Comparing real active products in inventory against your symptoms.</p>
         </div>
       )}
@@ -177,7 +180,7 @@ export default function FindMedicinesBySymptomPage() {
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-indigo-400" />
-                <h3 className="font-bold text-base">MediTrust AI Clinical Analysis</h3>
+                <h3 className="font-bold text-base">MediSearch AI Clinical Analysis</h3>
               </div>
               <Badge variant="purple" size="sm" className="bg-indigo-500/30 text-indigo-200 border-indigo-400/40">
                 Matched for: {aiAnalysis.symptomQuery || query}
@@ -206,7 +209,7 @@ export default function FindMedicinesBySymptomPage() {
               <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700">
                 Clinically Recommended OTC Options ({aiAnalysis.suggestedMedicines?.length || 0})
               </h3>
-              <span className="text-xs text-slate-400">Direct inventory dispatch via MediTrust Pharmacy</span>
+              <span className="text-xs text-slate-400">Direct inventory dispatch via MediSearch Pharmacy</span>
             </div>
 
             {(!aiAnalysis.suggestedMedicines || aiAnalysis.suggestedMedicines.length === 0) ? (

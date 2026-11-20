@@ -8,7 +8,6 @@ import {
   Phone, 
   Mail, 
   MapPin, 
-  ArrowRight,
   Heart
 } from 'lucide-react';
 import Button from '../common/Button';
@@ -72,7 +71,7 @@ export default function Footer() {
                 <HeartPulse className="w-5 h-5" />
               </div>
               <span className="text-2xl font-bold tracking-tight text-white">
-                Medi<span className="text-teal-400">Trust</span>
+                Medi<span className="text-teal-400">Search</span>
               </span>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed max-w-sm">
@@ -81,11 +80,11 @@ export default function Footer() {
             <div className="pt-2 text-xs text-slate-400 space-y-2">
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-teal-400 shrink-0" />
-                <span>Emergency: 1-800-MEDITRUST (24x7)</span>
+                <span>Emergency: 1-800-MEDISEARCH (24x7)</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-teal-400 shrink-0" />
-                <span>support@meditrust-health.org</span>
+                <span>support@medisearch-health.org</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-teal-400 shrink-0" />
@@ -186,10 +185,10 @@ export default function Footer() {
         {/* Bottom Disclaimer & Copyright */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p className="max-w-2xl text-[11px] leading-relaxed text-slate-400">
-            <span className="font-semibold text-slate-300">Medical Disclaimer:</span> MediTrust is a digital healthcare platform. The clinical content and AI tools are intended solely for educational, triage, and logistical coordination purposes and do not constitute formal medical diagnosis or emergency treatment. Always consult licensed medical professionals for clinical emergencies.
+            <span className="font-semibold text-slate-300">Medical Disclaimer:</span> MediSearch is a digital healthcare platform. The clinical content and AI tools are intended solely for educational, triage, and logistical coordination purposes and do not constitute formal medical diagnosis or emergency treatment. Always consult licensed medical professionals for clinical emergencies.
           </p>
           <div className="flex items-center gap-1 text-slate-400 whitespace-nowrap">
-            <span>© {new Date().getFullYear()} MediTrust Healthcare Inc. Built with</span>
+            <span>© {new Date().getFullYear()} MediSearch Healthcare Inc. Built with</span>
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
             <span>for education.</span>
           </div>

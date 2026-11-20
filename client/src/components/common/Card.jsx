@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Reusable Card component for MediTrust UI.
+ * Reusable Card component for MediSearch UI.
  * Standard rounded-2xl, soft shadow, healthcare styling.
  */
 export default function Card({

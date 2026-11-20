@@ -8,20 +8,11 @@ import {
   FileText,
   Settings,
   Camera,
-  Mail,
-  Phone,
-  Heart,
-  ShieldCheck,
   Download,
-  Bell,
   KeyRound,
-  Save,
-  CheckCircle2,
-  AlertTriangle
 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Badge from '../../components/common/Badge';
-import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Tabs from '../../components/common/Tabs';
 import { useDispatch, useSelector } from 'react-redux';
@@ -32,26 +23,7 @@ import Loader from '../../components/common/Loader';
 import { getProfile } from '../../features/auth/authSlice';
 import toast from "react-hot-toast"
 import ProfileForm from '../../components/ProfileForm';
-
-
-const MOCK_PRESCRIPTIONS = [
-  {
-    id: 'RX-2026-88',
-    doctor: 'Dr. Sarah Jenkins, MD (Cardiology)',
-    date: 'Sep 22, 2026',
-    diagnosis: 'Acute Bronchitis & Hypertension Review',
-    medicines: 'Amoxicillin 500mg, Lipitor 20mg',
-    fileName: 'Prescription_Sep22_2026.pdf',
-  },
-  {
-    id: 'RX-2026-45',
-    doctor: 'Dr. Marcus Vance, DO (Dermatology)',
-    date: 'Aug 14, 2026',
-    diagnosis: 'Contact Dermatitis & Eczema Flare',
-    medicines: 'Cerave Barrier Cream, Cetirizine 10mg',
-    fileName: 'Prescription_Aug14_2026.pdf',
-  },
-];
+import medicalService from '../../services/medicalService';
 
 export default function UserDashboardPage() {
   const onNavigate = useNavigateById();
@@ -59,28 +31,21 @@ export default function UserDashboardPage() {
   const { user } = useSelector(state => state.auth)
 
   const { data, isLoading, isSuccess, isError, error } = useQuery({ queryKey: ['user', user?.token], queryFn: (token) => authService.getMyProfile(token) })
+  const { data: prescriptions = [], isLoading: prescriptionsLoading, isError: prescriptionsError } = useQuery({ queryKey: ['my-prescriptions', user?.token], queryFn: () => medicalService.getMyPrescriptions(user.token), enabled: !!user?.token })
 
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
 
   const [activeTab, setActiveTab] = useState('profile');
-  const [saveSuccess, setSaveSuccess] = useState(false);
-
   const TABS = [
     { id: 'profile', label: 'Profile Info', icon: User },
-    { id: 'orders', label: 'My Orders', icon: Package, count: 4 },
-    { id: 'appointments', label: 'Doctor Appointments', icon: Calendar, count: 2 },
-    { id: 'lab', label: 'Lab Tests', icon: FlaskConical, count: 3 },
-    { id: 'prescriptions', label: 'Prescriptions', icon: FileText, count: 2 },
+    { id: 'orders', label: 'My Orders', icon: Package },
+    { id: 'appointments', label: 'Doctor Appointments', icon: Calendar },
+    { id: 'lab', label: 'Lab Tests', icon: FlaskConical },
+    { id: 'prescriptions', label: 'Prescriptions', icon: FileText },
     { id: 'settings', label: 'Account Settings', icon: Settings },
   ];
-
-  const handleSave = () => {
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
-  };
-
 
   useEffect(() => {
 
@@ -92,12 +57,12 @@ export default function UserDashboardPage() {
       toast.error(error.response?.data?.message || error.message)
     }
 
-    if (!user) {
+    if (!user?._id) {
       navigate("/login")
     }
 
 
-  }, [data, isError, error, isSuccess])
+  }, [data, isError, error, isSuccess, dispatch, navigate, user?._id])
 
 
 
@@ -172,16 +137,6 @@ export default function UserDashboardPage() {
         className="w-full justify-start overflow-x-auto"
       />
 
-      {saveSuccess && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs px-4 py-3 rounded-xl flex items-center justify-between animate-fade-in">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span>Profile information successfully updated in clinical vault (UI Simulation).</span>
-          </div>
-          <span className="font-semibold text-emerald-600">Saved</span>
-        </div>
-      )}
-
       {/* Tab 1: Profile Info Form */}
       {activeTab === 'profile' && (
         <ProfileForm user={user} />
@@ -234,7 +189,7 @@ export default function UserDashboardPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-slate-900">
-              Verified Digital Prescriptions ({MOCK_PRESCRIPTIONS.length})
+              Verified Digital Prescriptions ({prescriptions.length})
             </h3>
             <Button
               variant="outline"
@@ -246,35 +201,33 @@ export default function UserDashboardPage() {
             </Button>
           </div>
 
-          <div className="space-y-3">
-            {MOCK_PRESCRIPTIONS.map((rx) => (
-              <Card key={rx.id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {prescriptionsLoading ? <Card className="p-6 text-center text-slate-500">Loading saved prescriptions…</Card> : prescriptionsError ? <Card className="p-6 text-center text-rose-600">Could not load saved prescriptions.</Card> : prescriptions.length ? <div className="space-y-3">
+            {prescriptions.map((rx) => (
+              <Card key={rx._id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-slate-400 font-bold">{rx.id}</span>
+                      <span className="text-xs font-mono text-slate-400 font-bold">RX-{rx._id.slice(-8).toUpperCase()}</span>
                       <span className="text-xs text-slate-400">• {rx.date}</span>
                     </div>
-                    <h4 className="font-bold text-slate-900 text-sm mt-0.5">{rx.doctor}</h4>
-                    <p className="text-xs text-teal-700 font-medium">{rx.diagnosis}</p>
-                    <p className="text-[11px] text-slate-500 mt-1">Medications: {rx.medicines}</p>
+                    <h4 className="font-bold text-slate-900 text-sm mt-0.5">{rx.doctor_name || "Doctor not identified"}</h4>
+                    <p className="text-xs text-teal-700 font-medium">{rx.diagnosis_notes || "No diagnosis notes saved"}</p>
+                    <p className="text-[11px] text-slate-500 mt-1">Medications: {(rx.medicines || []).map(medicine => medicine.name).filter(Boolean).join(", ") || "No medicines identified"}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" icon={Download}>
-                    Download PDF
-                  </Button>
+                  {rx.image && <a href={rx.image} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50"><Download className="w-3.5 h-3.5"/>View scan</a>}
                   <Button variant="primary" size="sm" onClick={() => onNavigate('pharmacy')}>
                     Order Meds
                   </Button>
                 </div>
               </Card>
             ))}
-          </div>
+          </div> : <Card className="p-7 text-center text-slate-500">No saved prescriptions yet. Scanned prescriptions will appear here.</Card>}
         </div>
       )}
 

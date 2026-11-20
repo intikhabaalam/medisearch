@@ -12,7 +12,7 @@ import PathologyAppointment from "../../models/pathologyAppointmentModel.js";
 
 const getAllUsers = async (_req, res) => res.json(await User.find().select("-password").sort({ createdAt: -1 }).lean());
 const getAllOrders = async (_req, res) => res.json(await Order.find().populate("user", "name email phone").populate("product").sort({ createdAt: -1 }));
-const getAllDoctors = async (_req, res) => res.json(await Doctor.find().populate("user", "name email phone createdAt").sort({ createdAt: -1 }));
+const getAllDoctors = async (_req, res) => res.json(await Doctor.find().select("+documents").populate("user", "name email phone createdAt").sort({ createdAt: -1 }));
 const getAllProducts = async (_req, res) => res.json(await Product.find().sort({ createdAt: -1 }));
 const getAllPathologists = async (_req, res) => res.json(await Pathologist.find().populate("user", "name email phone createdAt").sort({ createdAt: -1 }));
 
@@ -87,9 +87,15 @@ const updatePathologist = async (req, res) => {
 };
 const updateDoctor = async (req, res) => {
     if (typeof req.body.isVerified !== "boolean") return res.status(400).json({ message: "isVerified must be true or false" });
-    const doctor = await Doctor.findByIdAndUpdate(req.params.did, { isVerified: req.body.isVerified, verificationStatus: req.body.isVerified ? "approved" : "rejected" }, { new: true }).populate("user", "name email phone userType");
+    const currentDoctor = await Doctor.findById(req.params.did);
+    if (!currentDoctor) return res.status(404).json({ message: "Doctor not found" });
+    const applicant = await User.findById(currentDoctor.user);
+    if (!applicant) return res.status(404).json({ message: "Doctor applicant account not found" });
+    if (!["USER", "DOCTOR"].includes(applicant.userType)) return res.status(409).json({ message: "Applicant account has a different provider role" });
+    const doctor = await Doctor.findByIdAndUpdate(req.params.did, { isVerified: req.body.isVerified, verificationStatus: req.body.isVerified ? "approved" : "rejected" }, { new: true, runValidators: true }).select("+documents").populate("user", "name email phone userType");
     if (!doctor) return res.status(404).json({ message: "Doctor not found" });
-    if (doctor.user && (req.body.isVerified || doctor.user.userType === "DOCTOR")) await User.findByIdAndUpdate(doctor.user._id, { userType: req.body.isVerified ? "DOCTOR" : "USER" });
+    applicant.userType = req.body.isVerified ? "DOCTOR" : "USER";
+    await applicant.save();
     res.json({ message: req.body.isVerified ? "Doctor verified successfully" : "Doctor verification rejected", doctor });
 };
 const getAllTests = async (_req, res) => res.json(await PathologyTest.find().populate("pathologist").sort({ createdAt: -1 }));

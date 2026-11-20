@@ -5,7 +5,6 @@ import { Mail, Phone, Save, User } from 'lucide-react'
 import Input from './common/Input'
 import { useMutation } from '@tanstack/react-query'
 import authService from '../services/authService'
-import Loader from './common/Loader'
 import toast from 'react-hot-toast'
 
 const ProfileForm = ({ user }) => {
@@ -50,7 +49,7 @@ const ProfileForm = ({ user }) => {
             toast.error(error.response?.data?.message || error.message)
         }
 
-    }, [isSuccess, isError])
+    }, [isSuccess, isError, data, error])
 
 
     return (

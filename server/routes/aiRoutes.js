@@ -10,6 +10,7 @@ router.post("/prescription", protect.forUser, upload.single('prescription'), aiC
 
 // Dynamic AI Medicine Details & Overall Prescription Explanation
 router.post("/prescription/explain-details", protect.forUser, aiController.explainMedicineDetails);
+router.get("/prescriptions", protect.forUser, aiController.getMyPrescriptions);
 
 // Medicine Availability Finder (Prescription-based)
 router.get("/find/:pid", protect.forUser, aiController.findMedicines);
@@ -20,7 +21,7 @@ router.post("/symptoms", aiController.findMedicinesBySymptom);
 // Real AI Chat (POST method; GET preserved for backward compatibility)
 router.post("/chat", protect.forUser, aiController.chatWithAi);
 router.get("/chat", protect.forUser, (req, res) => {
-    res.status(200).json({ message: "MediTrust AI Chat API is online. Send a POST request with { text: 'your message' }." });
+    res.status(200).json({ message: "MediSearch AI Chat API is online. Send a POST request with { text: 'your message' }." });
 });
 
 export default router;

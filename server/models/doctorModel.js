@@ -29,6 +29,11 @@ const doctorSchema = new mongoose.Schema(
             required: true,
             unique: true
         },
+        documents: {
+            type: [{ name: { type: String, required: true }, url: { type: String, required: true } }],
+            default: [],
+            select: false
+        },
 
         experience: {
             type: Number,

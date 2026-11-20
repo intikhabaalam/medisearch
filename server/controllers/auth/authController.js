@@ -92,14 +92,6 @@ const getMyProfile = async (req, res) => {
 
 
 const updateProfile = async (req, res) => {
-
-    const { userType } = req.body
-
-    if (userType) {
-        res.status(401)
-        throw new Error("Only Admin Can Change User Type!!!")
-    }
-
     let user = await User.findById(req.user.id)
 
     if (!user) {
@@ -107,14 +99,33 @@ const updateProfile = async (req, res) => {
         throw new Error("No User Found!")
     }
 
-    const updatedUser = await User.findByIdAndUpdate(user._id, req.body, { new: true })
+    const allowedFields = ["name", "email", "phone", "address"];
+    if (Object.keys(req.body).some(field => !allowedFields.includes(field))) return res.status(400).json({ message: "Only name, email, phone and address can be updated" });
+    const updates = {};
+    for (const field of allowedFields) {
+        if (req.body[field] === undefined) continue;
+        if (typeof req.body[field] !== "string" || (field !== "address" && !req.body[field].trim())) return res.status(400).json({ message: `${field} must be a non-empty string` });
+        updates[field] = req.body[field].trim();
+    }
+    if (!Object.keys(updates).length) return res.status(400).json({ message: "Provide at least one profile field to update" });
+    if (updates.email) {
+        updates.email = updates.email.toLowerCase();
+        if (!/^\S+@\S+\.\S+$/.test(updates.email)) return res.status(400).json({ message: "Enter a valid email address" });
+        if (await User.exists({ email: updates.email, _id: { $ne: user._id } })) return res.status(409).json({ message: "Email address is already in use" });
+    }
+    if (updates.phone && await User.exists({ phone: updates.phone, _id: { $ne: user._id } })) return res.status(409).json({ message: "Phone number is already in use" });
+
+    user.set(updates);
+    const updatedUser = await user.save();
 
     if (!updatedUser) {
         res.status(409)
         throw new Error("User Not Updated!")
     }
 
-    res.status(200).json(updatedUser)
+    const safeUser = updatedUser.toObject();
+    delete safeUser.password;
+    res.status(200).json(safeUser)
 }
 
 

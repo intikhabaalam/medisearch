@@ -68,7 +68,7 @@ export default function LabTestListingPage() {
               onClick={() => onNavigate('pathologist-apply')}
               className="bg-white/10 hover:bg-white/20 text-white border-white/30"
             >
-              Are you an accredited laboratory? Join MediTrust Network →
+              Are you an accredited laboratory? Join MediSearch Network →
             </Button>
           </div>
         </div>

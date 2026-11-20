@@ -501,7 +501,7 @@ const findMedicines = async (req, res) => {
             medicines: prescription.medicines
         });
 
-        const MEDICINE_FOUNDER_PROMPT = `You are a medicine and pathology-test availability checker for MediTrust.
+        const MEDICINE_FOUNDER_PROMPT = `You are a medicine and pathology-test availability checker for MediSearch.
 
 You will receive THREE pieces of data in JSON:
 1. "products" — current pharmacy inventory (id, name, description, price, stock, expiresOn, isActive)
@@ -636,6 +636,14 @@ ${serializedInventory}
     }
 };
 
+const getMyPrescriptions = async (req, res) => {
+    const prescriptions = await Prescription.find({ user: req.user._id })
+        .select("patient_name doctor_name date medicines diagnosis_notes image createdAt overall_explanation")
+        .sort({ createdAt: -1 })
+        .lean();
+    res.json(prescriptions);
+};
+
 // -------------------------------------------------------------
 // POST /api/ai/symptoms (Resilient Symptom Search, Never Returns 500)
 // -------------------------------------------------------------
@@ -672,7 +680,7 @@ const findMedicinesBySymptom = async (req, res) => {
             isActive: p.isActive
         }));
 
-        const SYMPTOM_CHECKER_PROMPT = `You are MediTrust's clinical AI symptom triage assistant.
+        const SYMPTOM_CHECKER_PROMPT = `You are MediSearch's clinical AI symptom triage assistant.
 A user describes the following symptom or health concern: "${query.replace(/"/g, "'")}".
 
 Available active products in the pharmacy catalog:
@@ -706,7 +714,7 @@ Return ONLY a valid JSON object matching this structure:
     {
       "id": "<real product id>",
       "name": "<real product name>",
-      "brand": "MediTrust Verified",
+      "brand": "MediSearch Verified",
       "category": "<category>",
       "indication": "<brief reason>",
       "price": 0,
@@ -761,13 +769,13 @@ Return ONLY a valid JSON object matching this structure:
 
         const fallbackResponse = {
             symptomQuery: query,
-            clinicalAssessment: `Your symptoms ("${query}") may be caused by mild or temporary conditions such as indigestion, viral infection, allergies, or physical strain. Over-the-counter options from the MediTrust pharmacy inventory are shown below for symptomatic relief. Please consult a licensed physician for a definitive clinical diagnosis.`,
+            clinicalAssessment: `Your symptoms ("${query}") may be caused by mild or temporary conditions such as indigestion, viral infection, allergies, or physical strain. Over-the-counter options from the MediSearch pharmacy inventory are shown below for symptomatic relief. Please consult a licensed physician for a definitive clinical diagnosis.`,
             lifestyleAdvice: "Ensure plenty of hydration, avoid spicy or heavy meals if experiencing gastrointestinal symptoms, take rest, and monitor your symptoms closely.",
             redFlags: "Seek emergency medical care immediately if you experience shortness of breath, radiating chest pressure, severe unrelenting pain, high persistent fever, or loss of consciousness.",
             suggestedMedicines: matchedProducts.map(p => ({
                 id: p._id.toString(),
                 name: p.name,
-                brand: "MediTrust Verified",
+                brand: "MediSearch Verified",
                 category: "Pharmacy OTC",
                 indication: p.description,
                 price: p.price,
@@ -786,7 +794,7 @@ Return ONLY a valid JSON object matching this structure:
         console.error("findMedicinesBySymptom unexpected error:", error);
         return res.status(200).json({
             symptomQuery: query,
-            clinicalAssessment: "We are currently experiencing high clinical request volumes. Please consult a qualified doctor on MediTrust or check our online pharmacy catalog for standard over-the-counter remedies.",
+            clinicalAssessment: "We are currently experiencing high clinical request volumes. Please consult a qualified doctor on MediSearch or check our online pharmacy catalog for standard over-the-counter remedies.",
             lifestyleAdvice: "Stay hydrated and get adequate rest.",
             redFlags: "In case of severe symptoms, difficulty breathing, or sudden intense pain, contact emergency medical services immediately.",
             suggestedMedicines: []
@@ -804,12 +812,12 @@ const chatWithAi = async (req, res) => {
         return res.status(400).json({ error: "Message text is required." });
     }
 
-    const CHAT_SYSTEM_INSTRUCTION = `You are MediTrust's Clinical AI Assistant.
+    const CHAT_SYSTEM_INSTRUCTION = `You are MediSearch's Clinical AI Assistant.
 Follow these medical safety rules strictly:
 - Provide general, evidence-grounded health information and educational guidance only.
 - NEVER give a definitive diagnosis.
 - NEVER prescribe prescription-only medications or calculate custom medicinal dosages.
-- Always encourage consulting a board-certified physician or booking an appointment on MediTrust.
+- Always encourage consulting a board-certified physician or booking an appointment on MediSearch.
 - If the query mentions severe warning signs (e.g. crushing chest pain, difficulty breathing, sudden numbness, severe head injury, uncontrolled bleeding), immediately advise calling emergency services (911/112) or going to the nearest emergency room.
 - Keep answers concise, clear, and empathetic.
 - Return response as valid JSON with:
@@ -839,7 +847,7 @@ Follow these medical safety rules strictly:
         } catch (_) {
             responseData = {
                 text: rawText,
-                sources: ["MediTrust Clinical Health Knowledgebase"]
+                sources: ["MediSearch Clinical Health Knowledgebase"]
             };
         }
 
@@ -848,8 +856,8 @@ Follow these medical safety rules strictly:
     } catch (error) {
         console.warn("chatWithAi fallback triggered:", error.message);
         return res.status(200).json({
-            text: "Hello! MediTrust Clinical AI provides educational health guidance. For specific symptoms, dosages, or treatments, please schedule an appointment with a verified healthcare professional on MediTrust. If experiencing an emergency, call 911 or visit your nearest emergency room immediately.",
-            sources: ["MediTrust Clinical Safety Guidelines"]
+            text: "Hello! MediSearch Clinical AI provides educational health guidance. For specific symptoms, dosages, or treatments, please schedule an appointment with a verified healthcare professional on MediSearch. If experiencing an emergency, call 911 or visit your nearest emergency room immediately.",
+            sources: ["MediSearch Clinical Safety Guidelines"]
         });
     }
 };
@@ -858,6 +866,7 @@ const aiController = {
     explainPrescription,
     explainMedicineDetails,
     findMedicines,
+    getMyPrescriptions,
     findMedicinesBySymptom,
     chatWithAi
 };

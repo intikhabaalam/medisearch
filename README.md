@@ -1,8 +1,8 @@
-# MediTrust
+# MediSearch
 
 ### AI-Powered Prescription & Healthcare Management Platform
 
-MediTrust is a full-stack healthcare platform designed to bring essential healthcare services together in one place. It helps patients manage prescriptions, explore medicines, connect with doctors, access diagnostic services, and get AI-assisted health information through a unified digital experience.
+MediSearch is a full-stack healthcare platform designed to bring essential healthcare services together in one place. It helps patients manage prescriptions, explore medicines, connect with doctors, access diagnostic services, and get AI-assisted health information through a unified digital experience.
 
 The platform combines modern web technologies with AI integration to simplify healthcare-related activities and improve accessibility.
 
@@ -29,7 +29,7 @@ The platform combines modern web technologies with AI integration to simplify he
 
 Healthcare services are often spread across different platforms, making it difficult for patients to manage prescriptions, find medicines, schedule doctor consultations, and access laboratory services.
 
-MediTrust aims to simplify these activities through a centralized healthcare platform.
+MediSearch aims to simplify these activities through a centralized healthcare platform.
 
 Users can upload prescriptions, access AI-assisted prescription information, explore available medicines, connect with doctors, and discover diagnostic services without switching between multiple applications.
 
@@ -149,7 +149,7 @@ Upload Prescription → Review Medicine Details → Explore Medicines → Book D
 
 ## System Architecture
 
-MediTrust follows a client-server architecture where the frontend communicates with the backend through REST APIs. The backend manages business logic, authentication, database operations, and external service integrations.
+MediSearch follows a client-server architecture where the frontend communicates with the backend through REST APIs. The backend manages business logic, authentication, database operations, and external service integrations.
 
 ```text
              ┌──────────────────┐
@@ -185,7 +185,7 @@ MediTrust follows a client-server architecture where the frontend communicates w
 
 ## AI Integration Flow
 
-MediTrust uses the Google Gemini API to support AI-powered healthcare functionality.
+MediSearch uses the Google Gemini API to support AI-powered healthcare functionality.
 
 ### Prescription Processing
 
@@ -233,7 +233,7 @@ Frontend Chat Interface
 
 ## Database Design
 
-MediTrust uses MongoDB with Mongoose to manage application data.
+MediSearch uses MongoDB with Mongoose to manage application data.
 
 Key data entities include:
 
@@ -255,7 +255,7 @@ The database structure supports relationships between users, doctors, laboratori
 ## Project Structure
 
 ```text
-MediTrust/
+MediSearch/
 │
 ├── client/
 │   ├── public/
@@ -297,7 +297,7 @@ Make sure the following tools are installed:
 
 ```bash
 git clone YOUR_REPOSITORY_URL
-cd MediTrust
+cd MediSearch
 ```
 
 ### 2. Install Backend Dependencies
@@ -381,7 +381,7 @@ Use the exact variable names configured in the application. Never upload actual 
 
 ## Disclaimer
 
-MediTrust is an educational and demonstration project. It is not a certified medical application and should not be used as a replacement for professional medical diagnosis, treatment, or advice.
+MediSearch is an educational and demonstration project. It is not a certified medical application and should not be used as a replacement for professional medical diagnosis, treatment, or advice.
 
 AI-generated prescription details and health-related responses may contain inaccuracies. Always consult a qualified healthcare professional before making medical decisions.
 
@@ -389,6 +389,6 @@ AI-generated prescription details and health-related responses may contain inacc
 
 ## Project Goal
 
-MediTrust aims to create a connected digital healthcare experience by combining prescription management, medicine discovery, doctor appointments, laboratory services, and AI-assisted support within a single platform.
+MediSearch aims to create a connected digital healthcare experience by combining prescription management, medicine discovery, doctor appointments, laboratory services, and AI-assisted support within a single platform.
 
-**MediTrust — Healthcare, Connected.**
+**MediSearch — Healthcare, Connected.**

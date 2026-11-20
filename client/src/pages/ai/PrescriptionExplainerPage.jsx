@@ -5,21 +5,16 @@ import {
   Upload, 
   FileText, 
   Scan, 
-  CheckCircle2, 
   AlertTriangle, 
   Clock, 
   Pill, 
   ShieldCheck, 
-  ArrowRight, 
-  RotateCw,
   Eye,
   ChevronDown,
   ChevronUp,
-  Info,
   Activity,
   HeartHandshake,
-  AlertCircle,
-  FileCheck
+  AlertCircle
 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Badge from '../../components/common/Badge';
@@ -739,7 +734,7 @@ export default function PrescriptionExplainerPage() {
           </div>
 
           <div className="rounded-xl bg-slate-100 p-4 text-xs text-slate-500 text-center">
-            MediTrust AI extraction is an assistive readout. Always double-check dosage instructions with the packaging label and your pharmacist.
+            MediSearch AI extraction is an assistive readout. Always double-check dosage instructions with the packaging label and your pharmacist.
           </div>
 
         </div>

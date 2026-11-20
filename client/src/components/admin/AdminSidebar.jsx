@@ -32,7 +32,7 @@ const AdminSidebar = () => {
                     </div>
                     <div>
                         <h2 className="text-sm font-bold text-slate-900 leading-tight">Admin Portal</h2>
-                        <p className="text-[10px] text-teal-900 font-semibold uppercase tracking-wider">MediTrust Health Hospital </p>
+                        <p className="text-[10px] text-teal-900 font-semibold uppercase tracking-wider">MediSearch Health Hospital </p>
                     </div>
                 </div>
             }

@@ -172,6 +172,10 @@ export default function VerificationModal({
                         Review the submitted registration number and
                         qualification before approving this application.
                     </p>
+                    {isDoctor && <div className="mt-3 space-y-2">
+                        <p className="text-xs font-semibold text-slate-700">Submitted professional documents</p>
+                        {item.documents?.length ? item.documents.map((document, index) => <a key={`${document.url}-${index}`} href={document.url} target="_blank" rel="noreferrer" className="block text-xs text-teal-700 underline break-all">{document.name || `Document ${index + 1}`}</a>) : <p className="text-xs text-slate-500">No documents were attached to this application.</p>}
+                    </div>}
                 </div>
 
                 {/* Notice */}

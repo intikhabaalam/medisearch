@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Reusable Badge component for MediTrust UI.
+ * Reusable Badge component for MediSearch UI.
  * Pure Tailwind CSS utility classes.
  * 
  * @param {'success'|'warning'|'danger'|'info'|'purple'|'neutral'} variant

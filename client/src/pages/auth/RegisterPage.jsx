@@ -8,8 +8,7 @@ import {
   Phone,
   Eye,
   EyeOff,
-  ShieldCheck,
-  CheckCircle2
+  ShieldCheck
 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
@@ -94,7 +93,7 @@ export default function RegisterPage() {
             Create Your Account
           </h1>
           <p className="text-xs sm:text-sm text-slate-500">
-            Join MediTrust to manage prescriptions, doctors, and lab tests
+            Join MediSearch to manage prescriptions, doctors, and lab tests
           </p>
         </div>
 
@@ -189,7 +188,7 @@ export default function RegisterPage() {
                   className="w-4 h-4 mt-0.5 rounded text-teal-600 focus:ring-teal-500 border-slate-300"
                 />
                 <span>
-                  I agree to the MediTrust{' '}
+                  I agree to the MediSearch{' '}
                   <span className="text-teal-600 underline">Terms of Service</span> and{' '}
                   <span className="text-teal-600 underline">HIPAA Privacy Notice</span>
                 </span>

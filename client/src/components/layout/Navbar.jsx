@@ -3,7 +3,6 @@ import {
   HeartPulse,
   Menu,
   X,
-  Search,
   User,
   Calendar,
   Pill,
@@ -11,8 +10,7 @@ import {
   Sparkles,
   Package,
   ShieldAlert,
-  ChevronRight,
-  PhoneCall
+  ChevronRight
 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from "react-router-dom"
@@ -71,7 +69,7 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="font-medium">24/7 Emergency Health Line:</span>
-                <span className="font-bold text-white tracking-wide">1-800-MEDITRUST</span>
+                <span className="font-bold text-white tracking-wide">1-800-MEDISEARCH</span>
               </div>
               <div className="hidden md:flex items-center gap-4 text-[11px] text-teal-200/80">
                 <span>✓ 100% Genuine Medicines</span>
@@ -97,7 +95,7 @@ export default function Navbar() {
             </div>
             <div>
               <span className="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-1">
-                Medi<span className="text-teal-600">Trust</span>
+                Medi<span className="text-teal-600">Search</span>
               </span>
               <span className="block text-[10px] uppercase tracking-wider font-semibold text-teal-700/80 -mt-1">
                 Healthcare Hub

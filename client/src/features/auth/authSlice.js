@@ -22,7 +22,7 @@ const authSlice = createSlice({
                 user: action.payload
             }
         },
-        logoutUser: (state, action) => {
+        logoutUser: (state) => {
             return {
                 ...state,
                 user: null

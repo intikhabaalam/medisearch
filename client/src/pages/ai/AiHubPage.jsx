@@ -8,14 +8,11 @@ import {
   ArrowRight, 
   ShieldAlert, 
   BrainCircuit, 
-  Clock, 
   CheckCircle2, 
-  HelpCircle,
   Zap
 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Badge from '../../components/common/Badge';
-import Button from '../../components/common/Button';
 
 export default function AiHubPage() {
   const onNavigate = useNavigateById();
@@ -41,7 +38,7 @@ export default function AiHubPage() {
     {
       id: 'ai-symptoms',
       title: 'Find Medicines by Symptom',
-      desc: 'Describe what you are feeling in plain words. MediTrust AI maps symptoms to proven over-the-counter remedies and connects directly to pharmacy.',
+      desc: 'Describe what you are feeling in plain words. MediSearch AI maps symptoms to proven over-the-counter remedies and connects directly to pharmacy.',
       icon: Activity,
       badge: 'Symptom Matcher',
       color: 'from-purple-600 to-teal-600',
@@ -62,7 +59,7 @@ export default function AiHubPage() {
         <div className="relative z-10 max-w-3xl space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold backdrop-blur-md">
             <Sparkles className="w-4 h-4 text-indigo-400 animate-spin" />
-            MediTrust Clinical AI Intelligence Suite
+            MediSearch Clinical AI Intelligence Suite
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
@@ -149,7 +146,7 @@ export default function AiHubPage() {
             Important Clinical Safety Disclaimer
           </h4>
           <p className="text-xs text-amber-900/80 leading-relaxed">
-            MediTrust AI is an informational and triage assistance tool trained on clinical reference data. It does not provide formal medical diagnoses or prescribe controlled pharmaceuticals. If you are experiencing symptoms of a stroke, heart attack, or acute medical trauma, immediately dial 911 or head to the closest emergency room.
+            MediSearch AI is an informational and triage assistance tool trained on clinical reference data. It does not provide formal medical diagnoses or prescribe controlled pharmaceuticals. If you are experiencing symptoms of a stroke, heart attack, or acute medical trauma, immediately dial 911 or head to the closest emergency room.
           </p>
         </div>
       </div>

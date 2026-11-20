@@ -6,9 +6,7 @@ import {
   Lock,
   Eye,
   EyeOff,
-  ArrowRight,
-  ShieldCheck,
-  CheckCircle2
+  ShieldCheck
 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
@@ -95,7 +93,7 @@ export default function LoginPage() {
             </div>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Welcome to MediTrust
+            Welcome to MediSearch
           </h1>
           <p className="text-xs sm:text-sm text-slate-500">
             Unified access for patients, doctors, and healthcare partners
@@ -180,7 +178,7 @@ export default function LoginPage() {
           {/* Switch to Register */}
           <div className="mt-6 pt-6 border-t border-slate-100 text-center">
             <p className="text-xs text-slate-600">
-              Don't have a MediTrust account?{' '}
+              Don't have a MediSearch account?{' '}
               <button
                 type="button"
                 onClick={() => onNavigate('register')}
